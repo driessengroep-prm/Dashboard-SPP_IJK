@@ -3,7 +3,7 @@ import { koppel, type KoppelResultaat } from '../core/matching';
 import { HR_HERKENNINGSKOP, HR_WERKBLAD, parseHr } from '../core/parsing/hr';
 import { SPP_KOLOMMEN, parseSpp, type SppResultaat } from '../core/parsing/spp';
 import { ParseFout } from '../core/parsing/tabel';
-import { leesAlleTabellen, leesWerkblad } from '../core/parsing/xlsx';
+import { WERKBOEK_EXTENSIES, leesAlleTabellen, leesWerkblad } from '../core/parsing/xlsx';
 import { heeftToegang, magBeheren, type Rol } from '../core/roles';
 import { DEMO_HR_BESTAND, DEMO_SPP_BESTAND } from './demoConfig';
 import { GeenToegangFout, MAX_UPLOAD_BYTES, UploadFout, type BeheerOverzicht, type DashboardData, type DataSource } from './types';
@@ -90,7 +90,9 @@ export class BrowserDataSource implements DataSource {
   async upload(rollen: readonly Rol[], spp: File, hr: File): Promise<BeheerOverzicht> {
     if (!magBeheren(rollen)) throw new GeenToegangFout();
     for (const f of [spp, hr]) {
-      if (!f.name.toLowerCase().endsWith('.xlsx')) throw new UploadFout(`"${f.name}" is geen .xlsx-bestand.`);
+      if (!WERKBOEK_EXTENSIES.some((ext) => f.name.toLowerCase().endsWith(ext))) {
+        throw new UploadFout(`"${f.name}" is geen Excel-bestand (.xlsx of .xlsb).`);
+      }
       if (f.size > MAX_UPLOAD_BYTES) throw new UploadFout(`"${f.name}" is groter dan 10 MB.`);
     }
     const [sppBytes, hrBytes] = await Promise.all([spp.arrayBuffer(), hr.arrayBuffer()]);

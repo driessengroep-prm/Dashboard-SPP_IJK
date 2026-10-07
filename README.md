@@ -10,7 +10,7 @@ Opgezet op dezelfde manier als het dashboard AI & data trainingsprogramma, in de
 
 ## Invoer
 
-De beheerder uploadt op de beheerpagina twee Excel-exports:
+De beheerder uploadt op de beheerpagina twee Excel-exports, als **.xlsx** of **.xlsb** (binaire Excel-werkmap):
 
 1. **SPP-export**: medewerkers, hun leidinggevende en (indien gescoord) het kwadrant. Het standaardformaat heeft **geen kopregel** en deze vaste kolommen:
 
@@ -65,11 +65,13 @@ Vereist: Node.js 20 of hoger (CI gebruikt 22).
 
 De fictieve testdata volgt de echte structuur van bedrijven en OE's met verzonnen namen, leidinggevenden en kwadranten; alle e-mailadressen eindigen op `.example`. De fictieve HR-lijst bevat de hele groep (833 medewerkers bij 14 bedrijven), de fictieve SPP-export alleen de medewerkers van IJK B.V. en IJK Services B.V., in hetzelfde formaat als de echte (geen kopregel, kolommen A–E). Net als de echte HR-export heeft de fictieve HR-lijst geen personeelsnummer. Bewuste randgevallen: verschillende schrijfwijzen van kwadranten, gelijke namen (onderscheiden op bedrijf), een onbekende kwadrantwaarde, een dubbele SPP-regel en twee personen die niet in de HR-lijst staan.
 
+De map `testdata/fictief/xlsb/` bevat dezelfde fictieve exports als .xlsb, eenmalig omgezet met een los hulpmiddel (SheetJS) buiten de repo, plus een bestand met alle celtypen. De tests controleren dat .xlsb exact dezelfde tabellen oplevert als .xlsx. Het .xlsb-formaat wordt gelezen door een eigen lezer (`src/core/parsing/xlsb.ts`), zonder extra dependency.
+
 ## Publicatie (GitHub Pages)
 
 Elke push naar `main` draait `.github/workflows/pages.yml`: tests → privacycheck → demo-build → privacycheck op de build → deploy. Faalt een stap, dan wordt er niet gedeployed. Bij een pull request draaien dezelfde controles, zonder deploy. Zet in de repo-instellingen onder *Settings → Pages* de bron op **GitHub Actions**.
 
-De privacycheck laat de build falen bij `.xlsx`/`.xls`/`.csv` buiten `testdata/fictief/`, bij e-mailadressen die niet op `.example` eindigen in de build en bij iets dat op een sleutel of geheim lijkt. De demo-upload weigert bestanden met echte e-mailadressen en een SPP-export die niet aansluit op de fictieve HR-lijst (minder dan 90% gekoppeld).
+De privacycheck laat de build falen bij `.xlsx`/`.xlsb`/`.xls`/`.csv` buiten `testdata/fictief/`, bij e-mailadressen die niet op `.example` eindigen in de build en bij iets dat op een sleutel of geheim lijkt. De demo-upload weigert bestanden met echte e-mailadressen en een SPP-export die niet aansluit op de fictieve HR-lijst (minder dan 90% gekoppeld).
 
 ## Structuur
 

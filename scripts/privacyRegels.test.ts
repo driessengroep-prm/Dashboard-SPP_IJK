@@ -4,8 +4,8 @@ import { gevondenGeheimen, nietToegestaneEmails, verbodenDatabestanden } from '.
 describe('privacy rules', () => {
   it('allows data files only in testdata/fictief/', () => {
     expect(
-      verbodenDatabestanden(['testdata/fictief/a.xlsx', 'data/echt.xlsx', 'export.CSV', 'oud.xls', 'src/app.ts', 'testdata/fictief/sub/b.csv']),
-    ).toEqual(['data/echt.xlsx', 'export.CSV', 'oud.xls']);
+      verbodenDatabestanden(['testdata/fictief/a.xlsx', 'data/echt.xlsx', 'export.CSV', 'oud.xls', 'spp.XLSB', 'src/app.ts', 'testdata/fictief/xlsb/b.xlsb']),
+    ).toEqual(['data/echt.xlsx', 'export.CSV', 'oud.xls', 'spp.XLSB']);
   });
 
   it('flags e-mail addresses that do not end in .example', () => {

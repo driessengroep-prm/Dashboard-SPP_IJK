@@ -1,6 +1,8 @@
 import ExcelJS from 'exceljs';
 import type { Cel, Tabel } from '../types';
 import { ParseFout, vindKoprij } from './tabel';
+import { isXlsb, leesXlsb } from './xlsb';
+import { isZip, openZip } from './zip';
 
 type Invoer = ArrayBuffer | Uint8Array;
 
@@ -39,7 +41,10 @@ function werkbladNaarTabel(ws: ExcelJS.Worksheet): Tabel {
   return tabel;
 }
 
-export async function laadWerkboek(invoer: Invoer): Promise<ExcelJS.Workbook> {
+/** Accepted workbook formats (file extensions) for uploads. */
+export const WERKBOEK_EXTENSIES = ['.xlsx', '.xlsb'] as const;
+
+async function laadXlsx(invoer: Invoer): Promise<ExcelJS.Workbook> {
   const wb = new ExcelJS.Workbook();
   try {
     // exceljs accepts an ArrayBuffer in the browser and a Buffer/Uint8Array in Node
@@ -48,6 +53,19 @@ export async function laadWerkboek(invoer: Invoer): Promise<ExcelJS.Workbook> {
     throw new ParseFout('Het bestand kon niet als .xlsx worden gelezen.');
   }
   return wb;
+}
+
+/**
+ * All worksheets of a workbook as plain tables. The format is recognised by the content,
+ * not the file name: an Excel Binary Workbook (.xlsb) is read by our own reader, an Office
+ * Open XML workbook (.xlsx) by exceljs.
+ */
+export async function leesWerkboek(invoer: Invoer): Promise<{ naam: string; tabel: Tabel }[]> {
+  if (!isZip(invoer)) throw new ParseFout('Het bestand is geen .xlsx- of .xlsb-bestand.');
+  const zip = openZip(invoer);
+  if (isXlsb(zip)) return leesXlsb(zip);
+  const wb = await laadXlsx(invoer);
+  return wb.worksheets.map((ws) => ({ naam: ws.name, tabel: werkbladNaarTabel(ws) }));
 }
 
 /**
@@ -61,10 +79,10 @@ export async function leesWerkblad(
   verplichteKop: string | readonly string[],
   opties: { eersteAlsTerugval?: boolean } = {},
 ): Promise<Tabel> {
-  const wb = await laadWerkboek(invoer);
-  const voorkeur = werkblad ? wb.getWorksheet(werkblad) : undefined;
-  if (voorkeur) return werkbladNaarTabel(voorkeur);
-  const tabellen = wb.worksheets.map(werkbladNaarTabel);
+  const bladen = await leesWerkboek(invoer);
+  const voorkeur = werkblad ? bladen.find((b) => b.naam === werkblad) : undefined;
+  if (voorkeur) return voorkeur.tabel;
+  const tabellen = bladen.map((b) => b.tabel);
   const metKop = tabellen.find((t) => vindKoprij(t, verplichteKop) >= 0);
   if (metKop) return metKop;
   const metData = tabellen.find((t) => t.some((rij) => rij.some((c) => c !== null && c !== '')));
@@ -76,6 +94,5 @@ export async function leesWerkblad(
 
 /** All cells of all worksheets, used by the demo upload guard. */
 export async function leesAlleTabellen(invoer: Invoer): Promise<Tabel[]> {
-  const wb = await laadWerkboek(invoer);
-  return wb.worksheets.map(werkbladNaarTabel);
+  return (await leesWerkboek(invoer)).map((b) => b.tabel);
 }

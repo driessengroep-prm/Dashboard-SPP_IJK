@@ -8,7 +8,7 @@ Interne tool die de **SPP-export** (medewerker, leidinggevende, SPP-kwadrant) co
 - De GitHub Pages-demo is publiek en bevat alleen fictieve data. Echte exports alleen in de lokale build (`npm run build:lokaal`, CSP zonder netwerk, alles in het geheugen).
 - Geen localStorage/IndexedDB, geen netwerkverzoeken met data, geen persoonsgegevens in foutmeldingen of logs (uitzonderingenlijst alleen voor de beheerder).
 - Dataminimalisatie: lees alleen de kolommen uit `src/core/parsing/spp.ts` en `hr.ts`. De kolom "Leidinggevende" van de HR-export wordt niet gelezen; de leidinggevende komt uit de SPP-export.
-- Gebruik `exceljs` (niet het npm-pakket `xlsx`). Houd dependencies minimaal.
+- Gebruik `exceljs` voor .xlsx (niet het npm-pakket `xlsx`). .xlsb wordt gelezen door de eigen lezer in `src/core/parsing/xlsb.ts` + `zip.ts` (geen extra dependency). Houd dependencies minimaal.
 
 ## Afspraken
 

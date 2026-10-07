@@ -4,9 +4,9 @@
  */
 
 export const TOEGESTANE_DATA_MAP = 'testdata/fictief/';
-const DATA_EXTENSIES = /\.(xlsx|xls|csv)$/i;
+const DATA_EXTENSIES = /\.(xlsx|xlsb|xls|csv)$/i;
 
-/** Data files (.xlsx/.xls/.csv) are only allowed inside testdata/fictief/. */
+/** Data files (.xlsx/.xlsb/.xls/.csv) are only allowed inside testdata/fictief/. */
 export function verbodenDatabestanden(paden: readonly string[]): string[] {
   return paden.filter((p) => DATA_EXTENSIES.test(p) && !p.replace(/\\/g, '/').startsWith(TOEGESTANE_DATA_MAP));
 }
