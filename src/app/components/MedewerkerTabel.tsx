@@ -61,8 +61,8 @@ export function MedewerkerTabel({ regels, onExport }: { regels: DashboardRegel[]
       </div>
       {exportFout && <p className="fout">{exportFout}</p>}
       <p className="subtiel klein">
-        {rijen.length} medewerker{rijen.length === 1 ? '' : 's'} in de huidige selectie. De export bevat precies deze lijst, plus de tabellen per bedrijf,
-        afdeling en leidinggevende.
+        {rijen.length} medewerker{rijen.length === 1 ? '' : 's'} in de huidige selectie. De export bevat precies deze lijst, plus de tabellen per afdeling
+        en leidinggevende.
       </p>
       <div className="tabel-scroll">
         <table className="matrix">

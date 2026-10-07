@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { perAfdeling, perBedrijf, perLeidinggevende, pct, verdeling, type Groep } from '../../core/aggregate';
+import { perAfdeling, perLeidinggevende, pct, verdeling, type Groep } from '../../core/aggregate';
 import { KWADRANTEN, SPP_STATUSSEN, STATUS_LABELS, type SppStatus } from '../../core/config/kwadranten';
 import { bouwGroepExport, bouwMedewerkerExport, exportBestandsnaam } from '../../core/export';
 import { bedrijfSleutel, leidinggevendeVan, medewerkerId, pasFiltersToe, pasSelectieToe, type DashboardFilters } from '../../core/filters';
@@ -87,7 +87,7 @@ export function Dashboard() {
   const selectie = useMemo(() => pasSelectieToe(regels, filters), [regels, filters]);
   const gefilterd = useMemo(() => pasFiltersToe(regels, filters), [regels, filters]);
   const groepen = useMemo(
-    () => ({ bedrijf: perBedrijf(selectie), afdeling: perAfdeling(selectie), leidinggevende: perLeidinggevende(selectie) }),
+    () => ({ afdeling: perAfdeling(selectie), leidinggevende: perLeidinggevende(selectie) }),
     [selectie],
   );
 
@@ -128,7 +128,6 @@ export function Dashboard() {
   };
   const naarDetail = () => setTimeout(() => detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
   const kiesGroep = (d: Dimensie, g: Groep) => {
-    if (d === 'bedrijf') zetBedrijven([g.sleutel]);
     if (d === 'afdeling') zetAfdelingen([g.sleutel]);
     if (d === 'leidinggevende') zetLeidinggevenden([g.sleutel]);
   };
@@ -152,7 +151,6 @@ export function Dashboard() {
     await downloadExcel(
       [
         bouwMedewerkerExport(rijen),
-        bouwGroepExport('Per bedrijf', 'Bedrijf', groepen.bedrijf),
         bouwGroepExport('Per afdeling', 'Afdeling/OE', groepen.afdeling),
         bouwGroepExport('Per leidinggevende', 'Leidinggevende', groepen.leidinggevende),
       ],
@@ -167,7 +165,7 @@ export function Dashboard() {
         <div>
           <h1>Dashboard strategische personeelsplanning</h1>
           <p>
-            SPP-kwadranten per medewerker, bedrijf, afdeling en leidinggevende
+            SPP-kwadranten per medewerker, afdeling en leidinggevende
             {data.peildatum ? ` · gegevens van ${data.peildatum.toLocaleDateString('nl-NL')}` : ''}
           </p>
         </div>
@@ -261,21 +259,12 @@ export function Dashboard() {
               <p className="subtiel klein">Aantal medewerkers per kwadrant in de selectie. Klik op een kwadrant om de medewerkers te tonen.</p>
               <KwadrantMatrix v={totaal} actief={gekozen} onKies={wisselKwadrant} />
             </section>
-            <GroepKaart
-              titel="Per bedrijf"
-              toelichting="Verhouding van de kwadranten per bedrijf. Klik op een bedrijf om erop te filteren."
-              groepen={groepen.bedrijf}
-              basis={basis}
-              actief={filters.bedrijven ?? []}
-              onKies={(g) => zetBedrijven([g.sleutel])}
-            />
+            <Vergelijking groepen={groepen} totaal={totaal} basis={basis} startKwadrant={gekozen[0] ?? 'talent'} onKies={kiesGroep} />
           </div>
-
-          <Vergelijking groepen={groepen} totaal={totaal} basis={basis} startKwadrant={gekozen[0] ?? 'talent'} onKies={kiesGroep} />
 
           <GroepKaart
             titel="Per afdeling/OE"
-            toelichting="Verhouding en aantallen per afdeling/OE. Klik op een afdeling om de medewerkers te zien. Tip: filter eerst op bedrijf."
+            toelichting="Verhouding en aantallen per afdeling/OE. Klik op een afdeling om de medewerkers te zien."
             groepen={groepen.afdeling}
             basis={basis}
             perKwadrant

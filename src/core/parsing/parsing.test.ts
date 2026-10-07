@@ -104,7 +104,7 @@ describe('xlsx parsing of the generated fictitious exports', () => {
   it('reads the SPP export', async () => {
     const r = parseSpp(await leesWerkblad(leesFictiefSpp(), null, SPP_KOLOMMEN.kwadrant.namen, { eersteAlsTerugval: true }));
     expect(r.heeftKopregel).toBe(false);
-    expect(r.rijen.length).toBe(836);
+    expect(r.rijen.length).toBe(267); // IJK only
     expect(r.rijen.every((x) => x.personeelsnummer && x.bedrijf)).toBe(true);
   });
 

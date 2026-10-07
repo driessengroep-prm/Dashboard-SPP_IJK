@@ -794,7 +794,12 @@ button.tegel:hover {
   min-width: 2px;
 }
 .vergelijk-waarde {
-  margin-left: 8px;
+  /* Sits above the dashed average line, so the line never crosses the label */
+  position: relative;
+  z-index: 1;
+  background: var(--oppervlak);
+  padding: 0 4px;
+  margin-left: 4px;
   white-space: nowrap;
   color: var(--inkt-2);
   font-variant-numeric: tabular-nums;
