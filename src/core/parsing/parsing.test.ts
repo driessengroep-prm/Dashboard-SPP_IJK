@@ -47,6 +47,24 @@ describe('parseSpp', () => {
     expect(r.rijen.map((x) => x.rijnummer)).toEqual([3]);
   });
 
+  it('reads the delivered export with its header row (Mdw. · Mdw. · Werkgever · Naam Leidinggevende · SPP)', () => {
+    const r = parseSpp([
+      ['Mdw.', 'Mdw.', 'Werkgever', 'Naam Leidinggevende', 'SPP'],
+      [3345, 'Jan Janssen', 'IJK B.V.', 'Piet Pietersen', 'Talent\\voorloper'],
+      [3346, 'Kees de Vries', 'IJK B.V.', 'Piet Pietersen', null],
+    ]);
+    expect(r).toMatchObject({ heeftKopregel: true, heeftPersoneelsnummer: true, heeftLeidinggevende: true });
+    expect(r.rijen).toEqual([
+      { rijnummer: 2, naam: 'Jan Janssen', email: null, personeelsnummer: '3345', bedrijf: 'IJK B.V.', leidinggevende: 'Piet Pietersen', kwadrantRuw: 'Talent\\voorloper' },
+      { rijnummer: 3, naam: 'Kees de Vries', email: null, personeelsnummer: '3346', bedrijf: 'IJK B.V.', leidinggevende: 'Piet Pietersen', kwadrantRuw: '' },
+    ]);
+  });
+
+  it('recognises a single "Mdw." column by its values', () => {
+    expect(parseSpp([['Mdw.', 'SPP'], ['Jan Janssen', 'Vraagteken']]).rijen[0]).toMatchObject({ naam: 'Jan Janssen', personeelsnummer: null });
+    expect(() => parseSpp([['Mdw.', 'SPP'], [3345, 'Vraagteken']])).toThrow(/Naam/);
+  });
+
   it('throws a clear error when the columns are not recognised', () => {
     expect(() => parseSpp([['Naam', 'E-mail'], ['Jan', 'jan@x.example']])).toThrow(/niet herkend/);
     expect(() => parseSpp([['E-mail', 'Kwadrant']])).toThrow(/Naam/);
@@ -103,7 +121,8 @@ describe('normalisation', () => {
 describe('xlsx parsing of the generated fictitious exports', () => {
   it('reads the SPP export', async () => {
     const r = parseSpp(await leesWerkblad(leesFictiefSpp(), null, SPP_KOLOMMEN.kwadrant.namen, { eersteAlsTerugval: true }));
-    expect(r.heeftKopregel).toBe(false);
+    expect(r.heeftKopregel).toBe(true);
+    expect(r.heeftPersoneelsnummer && r.heeftLeidinggevende).toBe(true);
     expect(r.rijen.length).toBe(267); // IJK only
     expect(r.rijen.every((x) => x.personeelsnummer && x.bedrijf)).toBe(true);
   });

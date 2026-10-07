@@ -12,14 +12,14 @@ Opgezet op dezelfde manier als het dashboard AI & data trainingsprogramma, in de
 
 De beheerder uploadt op de beheerpagina twee Excel-exports, als **.xlsx** of **.xlsb** (binaire Excel-werkmap):
 
-1. **SPP-export**: medewerkers, hun leidinggevende en (indien gescoord) het kwadrant. Het standaardformaat heeft **geen kopregel** en deze vaste kolommen:
+1. **SPP-export**: medewerkers, hun leidinggevende en (indien gescoord) het kwadrant. De standaardexport (.xlsb of .xlsx) heeft deze kopregel; de eerste twee kolommen heten allebei "Mdw.":
 
-   | A | B | C | D | E |
+   | Mdw. | Mdw. | Werkgever | Naam Leidinggevende | SPP |
    |---|---|---|---|---|
-   | personeelsnummer | naam | bedrijf | leidinggevende | kwadrant |
+   | *personeelsnummer* | *naam* | *bedrijf* | *leidinggevende* | *kwadrant* |
    | 3345 | Jan Janssen | IJK B.V. | Piet Pietersen | Talent\\voorloper |
 
-   Een lege cel in kolom E = niet gescoord. Kwadrantwaarden worden herkend ongeacht schrijfwijze (`\`, `/`, hoofdletters): *Talent/voorloper* (ook "Talent", "Voorloper"), *Vaste waarde/sterkhouder* (ook "Vaste waarde", "Sterkhouder"), *Vraagteken* en *Achterblijver*. Een onbekende waarde telt als niet gescoord en komt op de uitzonderingenlijst. Een export mét kopregel (bijv. "Naam", "Kwadrant", "Leidinggevende", "Personeelsnummer") wordt ook herkend; zie `src/core/parsing/spp.ts`.
+   Een lege cel in de kolom SPP = niet gescoord. Kwadrantwaarden worden herkend ongeacht schrijfwijze (`\`, `/`, hoofdletters): *Talent/voorloper* (ook "Talent", "Voorloper"), *Vaste waarde/sterkhouder* (ook "Vaste waarde", "Sterkhouder"), *Vraagteken* en *Achterblijver*. Een onbekende waarde telt als niet gescoord en komt op de uitzonderingenlijst. Andere kopnamen (bijv. "Naam", "Kwadrant", "Leidinggevende", "Personeelsnummer") en een export zonder kopregel (kolommen A–E in dezelfde volgorde) worden ook herkend; zie `src/core/parsing/spp.ts`.
 2. **HR-export** ("Lijst FvB", werkblad "DG MW in dienst"): exact hetzelfde bestand als bij het dashboard AI & data trainingsprogramma. Gelezen worden `Naam`, `Werkgevernaam`, `Org. eenheid omschrijving` en, als ze er zijn, `E-mail werk` en `Personeelsnummer`.
 
 **Koppeling:** op naam (voor- en achternaam; ook "Achternaam, Voornaam"), want de HR-export heeft geen personeelsnummer. Komt een naam vaker voor in de HR-lijst, dan beslist het bedrijf uit kolom C van de SPP-export. (Bevat een export wel een personeelsnummer of e-mail, dan gaat de koppeling daar eerst op.) De SPP-export bepaalt wie er in het dashboard staat. Wie niet in de HR-lijst staat, blijft zichtbaar met het bedrijf uit de SPP-export en afdeling "Onbekend (niet in HR-lijst)" en komt op de uitzonderingenlijst, net als namen die meerdere keren in de HR-lijst voorkomen en dubbele SPP-regels.
@@ -63,7 +63,7 @@ Vereist: Node.js 20 of hoger (CI gebruikt 22).
 | `npm run privacy-check` | Privacycheck op de repo en `dist/` |
 | `npm run testdata` | Fictieve testdata opnieuw genereren in `testdata/fictief/` |
 
-De fictieve testdata volgt de echte structuur van bedrijven en OE's met verzonnen namen, leidinggevenden en kwadranten; alle e-mailadressen eindigen op `.example`. De fictieve HR-lijst bevat de hele groep (833 medewerkers bij 14 bedrijven), de fictieve SPP-export alleen de medewerkers van IJK B.V. en IJK Services B.V., in hetzelfde formaat als de echte (geen kopregel, kolommen A–E). Net als de echte HR-export heeft de fictieve HR-lijst geen personeelsnummer. Bewuste randgevallen: verschillende schrijfwijzen van kwadranten, gelijke namen (onderscheiden op bedrijf), een onbekende kwadrantwaarde, een dubbele SPP-regel en twee personen die niet in de HR-lijst staan.
+De fictieve testdata volgt de echte structuur van bedrijven en OE's met verzonnen namen, leidinggevenden en kwadranten; alle e-mailadressen eindigen op `.example`. De fictieve HR-lijst bevat de hele groep (833 medewerkers bij 14 bedrijven), de fictieve SPP-export alleen de medewerkers van IJK B.V. en IJK Services B.V., in hetzelfde formaat als de echte (kopregel "Mdw. · Mdw. · Werkgever · Naam Leidinggevende · SPP"). Net als de echte HR-export heeft de fictieve HR-lijst geen personeelsnummer. Bewuste randgevallen: verschillende schrijfwijzen van kwadranten, gelijke namen (onderscheiden op bedrijf), een onbekende kwadrantwaarde, een dubbele SPP-regel en twee personen die niet in de HR-lijst staan.
 
 De map `testdata/fictief/xlsb/` bevat dezelfde fictieve exports als .xlsb, eenmalig omgezet met een los hulpmiddel (SheetJS) buiten de repo, plus een bestand met alle celtypen. De tests controleren dat .xlsb exact dezelfde tabellen oplevert als .xlsx. Het .xlsb-formaat wordt gelezen door een eigen lezer (`src/core/parsing/xlsb.ts`), zonder extra dependency.
 

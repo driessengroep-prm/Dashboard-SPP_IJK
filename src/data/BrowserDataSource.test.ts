@@ -34,7 +34,7 @@ describe('BrowserDataSource (demo)', () => {
     const b = (await ds.getBeheer(['beheerder']))!;
     expect(new Set(b.uitzonderingen.map((u) => u.type))).toEqual(new Set(['geen_hr_match', 'spp_dubbel', 'onbekend_kwadrant']));
     expect(b.samenvatting.perWijze).toEqual({ personeelsnummer: 0, email: 0, naam: 265 }); // HR export has no personnel number; incl. the duplicate row
-    expect(b.sppKolommen.kopregel).toBe(false);
+    expect(b.sppKolommen.kopregel).toBe(true); // header row "Mdw. · Mdw. · Werkgever · Naam Leidinggevende · SPP"
     // Two external rows are not in the HR list; a row without e-mail may hit a name that occurs twice
     expect(b.samenvatting.gekoppeld).toBe(b.samenvatting.medewerkers - b.uitzonderingen.filter((u) => u.type === 'geen_hr_match' || u.type === 'naam_dubbelzinnig').length);
   });
