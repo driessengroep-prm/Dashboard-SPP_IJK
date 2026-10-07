@@ -251,8 +251,8 @@ export function Dashboard() {
         <section className="kaart melding">Geen medewerkers in deze selectie.</section>
       ) : (
         <>
-          <div className="raster-2">
-            <section className="kaart">
+          <div className="raster-2 gelijke-hoogte">
+            <section className="kaart matrix-kaart">
               <div className="kaart-kop">
                 <h2>SPP-matrix</h2>
               </div>

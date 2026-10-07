@@ -570,6 +570,23 @@ button.tegel:hover {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr));
   gap: 16px;
 }
+/* SPP matrix and comparison side by side: both cards end at the same height; the matrix grows to fill */
+.raster-2.gelijke-hoogte {
+  align-items: stretch;
+}
+.matrix-kaart {
+  display: flex;
+  flex-direction: column;
+}
+.matrix-kaart .matrix-raster {
+  flex: 1;
+}
+/* "Toon alle": the long list scrolls inside the card instead of stretching the matrix next to it */
+.vergelijk.scrollbaar {
+  max-height: 560px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
 
 /* Quadrant colours */
 .k-talent {
