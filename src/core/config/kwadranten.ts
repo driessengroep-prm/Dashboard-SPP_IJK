@@ -31,8 +31,8 @@ export const KORTE_LABELS: Record<SppStatus, string> = {
  * horizontal = prestatie (low → high), vertical = groeiruimte (low at the top → high at the bottom).
  */
 export const MATRIX_ASSEN = {
-  x: { titel: 'Prestatie', toelichting: 'willen en kunnen' },
-  y: { titel: 'Groeiruimte', toelichting: 'willen en kunnen' },
+  x: { titel: 'Prestatie' },
+  y: { titel: 'Groeiruimte' },
 };
 export const MATRIX_POSITIE: Record<Kwadrant, { rij: 1 | 2; kolom: 1 | 2 }> = {
   achterblijver: { rij: 1, kolom: 1 },

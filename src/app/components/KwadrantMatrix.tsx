@@ -15,7 +15,7 @@ export function KwadrantMatrix(props: { v: Verdeling; basis: Basis; actief: SppS
     <>
       <div className="matrix-raster">
         <div className="matrix-as-titel x">
-          {MATRIX_ASSEN.x.titel} <span>({MATRIX_ASSEN.x.toelichting})</span>
+          {MATRIX_ASSEN.x.titel}
         </div>
         <div className="matrix-as-niveau" style={{ gridRow: 2, gridColumn: 3 }}>
           Laag
@@ -24,7 +24,7 @@ export function KwadrantMatrix(props: { v: Verdeling; basis: Basis; actief: SppS
           Hoog
         </div>
         <div className="matrix-as-titel y">
-          {MATRIX_ASSEN.y.titel} <span>({MATRIX_ASSEN.y.toelichting})</span>
+          {MATRIX_ASSEN.y.titel}
         </div>
         <div className="matrix-as-niveau rij" style={{ gridRow: 3, gridColumn: 2 }}>
           Laag
