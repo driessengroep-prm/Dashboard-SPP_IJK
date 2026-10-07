@@ -675,12 +675,6 @@ button.tegel:hover {
   text-align: center;
   color: var(--inkt);
 }
-.matrix-as-titel span {
-  font-family: var(--font-tekst);
-  font-weight: 400;
-  color: var(--inkt-2);
-  font-size: 0.8rem;
-}
 .matrix-as-titel.x {
   grid-row: 1;
   grid-column: 3 / 5;
