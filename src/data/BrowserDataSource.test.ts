@@ -1,4 +1,6 @@
 import ExcelJS from 'exceljs';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { leesFictiefHr, leesFictiefSpp } from '../core/testUtils';
 import { BrowserDataSource } from './BrowserDataSource';
@@ -58,6 +60,21 @@ describe('BrowserDataSource (demo)', () => {
 
   it('refuses non-xlsx files', async () => {
     await expect(demo().upload(['beheerder'], alsFile(new Uint8Array([1]), 'a.csv'), alsFile(leesFictiefHr(), 'hr.xlsx'))).rejects.toBeInstanceOf(UploadFout);
+  });
+});
+
+describe('xlsb uploads', () => {
+  const xlsb = (naam: string) => alsFile(new Uint8Array(readFileSync(join(__dirname, '..', '..', 'testdata', 'fictief', 'xlsb', naam))), naam);
+
+  it('accepts .xlsb exports in the demo and gives the same result as .xlsx', async () => {
+    const ds = demo();
+    const b = await ds.upload(['beheerder'], xlsb('SPP_export_IJK_20261001.xlsb'), xlsb('Lijst_FvB_20261001.xlsb'));
+    const referentie = (await demo().getBeheer(['beheerder']))!;
+    expect(b.samenvatting).toEqual(referentie.samenvatting);
+  });
+
+  it('refuses other file types with a clear message', async () => {
+    await expect(demo().upload(['beheerder'], alsFile(new Uint8Array([1]), 'spp.xls'), alsFile(leesFictiefHr(), 'hr.xlsx'))).rejects.toThrow(/\.xlsx of \.xlsb/);
   });
 });
 

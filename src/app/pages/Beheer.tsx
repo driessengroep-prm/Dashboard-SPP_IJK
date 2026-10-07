@@ -138,17 +138,17 @@ function Upload({ onKlaar }: { onKlaar: (o: BeheerOverzicht) => void }) {
     }
   };
 
-  const accept = '.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  const accept = '.xlsx,.xlsb,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12';
   return (
     <section className="kaart">
       <h2>Exports uploaden</h2>
       <form key={formKey} className="upload" onSubmit={verstuur}>
         <label>
-          <span>1. SPP-export (medewerkers, leidinggevenden en kwadrant, .xlsx)</span>
+          <span>1. SPP-export (medewerkers, leidinggevenden en kwadrant, .xlsx of .xlsb)</span>
           <input type="file" accept={accept} onChange={(e) => setSpp(e.target.files?.[0] ?? null)} />
         </label>
         <label>
-          <span>2. HR-export (Lijst FvB, .xlsx)</span>
+          <span>2. HR-export (Lijst FvB, .xlsx of .xlsb)</span>
           <input type="file" accept={accept} onChange={(e) => setHr(e.target.files?.[0] ?? null)} />
         </label>
         <button className="knop primair" type="submit" disabled={!spp || !hr || bezig}>

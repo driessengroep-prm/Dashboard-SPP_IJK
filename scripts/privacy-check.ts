@@ -2,7 +2,7 @@
  * Automated privacy check (runs in CI before the build is deployed).
  *
  * Fails when:
- *  1. an .xlsx/.xls/.csv file exists in the repo outside testdata/fictief/;
+ *  1. an .xlsx/.xlsb/.xls/.csv file exists in the repo outside testdata/fictief/;
  *  2. the build output (dist/) contains an e-mail address that does not end in .example
  *     (also inside bundled .xlsx files);
  *  3. source files or the build contain something that looks like an API key or an
@@ -64,7 +64,7 @@ async function main() {
         const tekst = tabellen.flat(2).filter((c) => typeof c === 'string').join('\n');
         const n = nietToegestaneEmails(tekst).length;
         if (n) fouten.push(`${n} niet-.example e-mailadres(sen) in ${rel}`);
-      } else if (/\.(xls|csv)$/i.test(p)) {
+      } else if (/\.(xlsb|xls|csv)$/i.test(p)) {
         fouten.push(`Onverwacht databestand in build-output: ${rel}`);
       } else {
         const tekst = readFileSync(p, 'utf8');
