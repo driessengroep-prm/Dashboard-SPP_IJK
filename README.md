@@ -30,7 +30,7 @@ Alles volgt de filters (bedrijf, afdeling/OE, leidinggevende, medewerker, SPP-kw
 
 - **Kerncijfers:** aantal medewerkers, en per kwadrant het aantal en het percentage. Klik op een tegel om op dat kwadrant te filteren.
 - **SPP-matrix** (2×2) volgens de potentieel- en prestatiematrix: horizontaal *prestatie* (laag → hoog), verticaal *groeiruimte* (laag boven → hoog onder). Achterblijver (eerlijke aandacht) en Vaste waarde (koesteren) boven, Vraagteken (uitdagen) en Talent (faciliteren) onder. Vastgelegd in `src/core/config/kwadranten.ts`.
-- **Vergelijking tussen afdelingen of leidinggevenden:** per gekozen kwadrant het aandeel per groep, van hoog naar laag, met het gemiddelde van de selectie als stippellijn. Groepen kleiner dan 5 zijn standaard verborgen.
+- **Vergelijking tussen afdelingen of leidinggevenden:** per gekozen kwadrant het aandeel per groep, van hoog naar laag, met het gemiddelde van de selectie als stippellijn. Groepen kleiner dan 5 worden niet getoond.
 - **Per afdeling/OE** en **per leidinggevende:** verdeling, aantallen of percentages per kwadrant, sorteerbaar.
 - **Medewerkers:** naam, bedrijf, afdeling/OE, leidinggevende en kwadrant; zoeken, sorteren en **exporteren naar Excel** (precies de getoonde lijst, plus de tabellen per afdeling/leidinggevende en de gebruikte selectie).
 - **Percentages van:** kies of percentages over de gescoorde medewerkers (standaard) of over alle medewerkers gaan.
