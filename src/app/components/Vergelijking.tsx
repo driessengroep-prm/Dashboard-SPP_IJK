@@ -72,7 +72,7 @@ export function Vergelijking(props: {
       {zichtbaar.length === 0 ? (
         <p className="melding">Geen groepen om te vergelijken in deze selectie.</p>
       ) : (
-        <ul className="vergelijk" aria-label={`Aandeel ${STATUS_LABELS[kwadrant]} per groep`}>
+        <ul className={alles ? "vergelijk scrollbaar" : "vergelijk"} aria-label={`Aandeel ${STATUS_LABELS[kwadrant]} per groep`}>
           <li className="vergelijk-kop" aria-hidden>
             <span />
             <span className="vergelijk-spoor">
