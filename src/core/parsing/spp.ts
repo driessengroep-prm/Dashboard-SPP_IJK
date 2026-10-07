@@ -1,6 +1,6 @@
 import { mapKwadrant } from '../config/kwadranten';
 import type { Cel, SppRij, Tabel } from '../types';
-import { ParseFout, celTekst, isLegeRij, kolomIndices, normaliseerEmail, normaliseerPersoneelsnummer, vindKoprij, type KolomDef } from './tabel';
+import { ParseFout, celTekst, isLegeRij, kolomIndices, normaliseerEmail, normaliseerKop, normaliseerPersoneelsnummer, vindKoprij, type KolomDef } from './tabel';
 
 type SppKolom = 'naam' | 'email' | 'personeelsnummer' | 'bedrijf' | 'leidinggevende' | 'kwadrant';
 
@@ -55,8 +55,30 @@ export function parseSpp(tabel: Tabel): SppResultaat {
   return kopIdx >= 0 ? metKopregel(tabel, kopIdx) : zonderKopregel(tabel);
 }
 
+/** Header used by the SPP export for both the personnel number and the employee name ("Mdw."). */
+const MDW = 'mdw';
+
+/**
+ * The SPP export labels two columns "Mdw.": the first holds the personnel number, the second
+ * the employee name (export layout: Mdw. · Mdw. · Werkgever · Naam Leidinggevende · SPP). A single
+ * "Mdw." column is a personnel number when its values are numbers, otherwise the name.
+ */
+function benoemMdwKolommen(tabel: Tabel, kopIdx: number): Cel[] {
+  const kop = [...tabel[kopIdx]];
+  const mdw = kop.flatMap((c, i) => (typeof c === 'string' && normaliseerKop(c) === MDW ? [i] : []));
+  if (mdw.length >= 2) {
+    kop[mdw[0]] = 'Personeelsnummer';
+    kop[mdw[1]] = 'Naam';
+  } else if (mdw.length === 1) {
+    const waarden = tabel.slice(kopIdx + 1).map((r) => r?.[mdw[0]]).filter((c) => celTekst(c) !== '');
+    const numeriek = waarden.filter((c) => /^\d+$/.test(normaliseerPersoneelsnummer(c ?? null) ?? '')).length;
+    kop[mdw[0]] = waarden.length > 0 && numeriek >= waarden.length / 2 ? 'Personeelsnummer' : 'Naam';
+  }
+  return kop;
+}
+
 function metKopregel(tabel: Tabel, kopIdx: number): SppResultaat {
-  const k = kolomIndices(tabel[kopIdx], SPP_KOLOMMEN, 'SPP-export');
+  const k = kolomIndices(benoemMdwKolommen(tabel, kopIdx), SPP_KOLOMMEN, 'SPP-export');
   const lees = (rij: Cel[], i: number) => (i >= 0 ? celTekst(rij[i]) : '');
   const rijen: SppRij[] = [];
   for (let i = kopIdx + 1; i < tabel.length; i++) {

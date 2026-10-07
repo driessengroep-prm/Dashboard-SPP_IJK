@@ -165,8 +165,9 @@ function Upload({ onKlaar }: { onKlaar: (o: BeheerOverzicht) => void }) {
         <p className="subtiel klein">Alleen deze kolommen worden ingelezen; alle andere kolommen worden genegeerd. Hoofdletters en spaties maken niet uit.</p>
         <ul className="kolomlijst">
           <li>
-            SPP-export zonder kopregel (zoals de standaardexport): A personeelsnummer, B naam, C bedrijf, D leidinggevende, E kwadrant. De koppeling met
-            de HR-export gaat op naam (voor- en achternaam); komt een naam vaker voor, dan beslist het bedrijf uit kolom C.
+            SPP-export (standaard): kopregel "Mdw." (personeelsnummer), "Mdw." (naam), "Werkgever", "Naam Leidinggevende", "SPP". Zonder kopregel
+            geldt dezelfde volgorde in kolom A t/m E. De koppeling met de HR-export gaat op naam (voor- en achternaam); komt een naam vaker voor,
+            dan beslist de werkgever.
           </li>
           <li>SPP-export mét kopregel, naam medewerker (verplicht): {kolomNamen('naam')}</li>
           <li>SPP-export mét kopregel, kwadrant (verplicht): {kolomNamen('kwadrant')}. Leeg = niet gescoord.</li>

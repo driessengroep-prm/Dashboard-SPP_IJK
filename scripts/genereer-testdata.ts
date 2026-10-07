@@ -2,8 +2,8 @@
  * Generates two fictitious .xlsx exports in testdata/fictief/:
  * - Lijst_FvB_<datum>.xlsx: the HR export, same structure as the real "Lijst FvB"
  *   (sheet "DG MW in dienst", title rows, columns) — identical to the AI & data dashboard;
- * - SPP_export_IJK_<datum>.xlsx: the SPP export in the delivered format: no header row, columns
- *   A personnel number · B name · C company · D manager · E quadrant.
+ * - SPP_export_IJK_<datum>.xlsx: the SPP export in the delivered format: header row
+ *   "Mdw. · Mdw. · Werkgever · Naam Leidinggevende · SPP" (personnel number, name, company, manager, quadrant).
  *
  * Companies, organisational units and headcounts follow the real structure
  * (scripts/data/organisatie-2026.ts); names, e-mail addresses, managers and quadrants are fictitious.
@@ -152,7 +152,8 @@ type SppRegel = [personeelsnummer: number | null, naam: string, bedrijf: string,
 async function schrijfSpp(rijen: SppRegel[]) {
   const wb = nieuwWerkboek();
   const ws = wb.addWorksheet('Blad1');
-  // Like the delivered export: no title or header row, data starts in row 1
+  // Like the delivered export: one header row, the first two columns are both called "Mdw."
+  ws.addRow(['Mdw.', 'Mdw.', 'Werkgever', 'Naam Leidinggevende', 'SPP']);
   for (const r of rijen) ws.addRow(r);
   await wb.xlsx.writeFile(join(OUT_DIR, DEMO_SPP_BESTAND));
 }
