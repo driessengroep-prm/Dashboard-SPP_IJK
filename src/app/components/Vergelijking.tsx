@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Groep, Verdeling } from '../../core/aggregate';
-import { KWADRANTEN, STATUS_LABELS, type SppStatus } from '../../core/config/kwadranten';
+import { KWADRANTEN, MATRIX_VOLGORDE, STATUS_LABELS, type SppStatus } from '../../core/config/kwadranten';
 import { STANDAARD_MIN_GROEPSGROOTTE } from '../../core/config/instellingen';
 import { deel, fmt, noemer, statussenVoor, type Basis } from './Kwadrant';
 
@@ -55,8 +55,8 @@ export function Vergelijking(props: {
         </div>
       </div>
       <div className="vergelijk-bediening">
-        <div className="segment-keuze" role="group" aria-label="Kwadrant">
-          {opties.map((s) => (
+        <div className="segment-keuze kwadrant-keuze" role="group" aria-label="Kwadrant">
+          {MATRIX_VOLGORDE.filter((s) => opties.includes(s)).map((s) => (
             <button key={s} type="button" aria-pressed={s === kwadrant} onClick={() => setKwadrant(s)}>
               <span className={`hexje k-${s}`} aria-hidden />
               {STATUS_LABELS[s]}
