@@ -33,7 +33,7 @@ Alles volgt de filters (bedrijf, afdeling/OE, leidinggevende, medewerker, SPP-kw
 - **Vergelijking tussen afdelingen of leidinggevenden:** per gekozen kwadrant het aandeel per groep, van hoog naar laag, met het gemiddelde van de selectie als stippellijn. Groepen kleiner dan 5 worden niet getoond.
 - **Per afdeling/OE** en **per leidinggevende:** verdeling, aantallen of percentages per kwadrant, sorteerbaar.
 - **Medewerkers:** naam, bedrijf, afdeling/OE, leidinggevende en kwadrant; zoeken, sorteren en **exporteren naar Excel** (precies de getoonde lijst, plus de tabellen per afdeling/leidinggevende en de gebruikte selectie).
-- **Percentages van:** kies of percentages over de gescoorde medewerkers (standaard) of over alle medewerkers gaan.
+- **Percentages van:** kies of percentages over alle medewerkers (standaard) of alleen over de gescoorde medewerkers gaan.
 
 ## Lokaal gebruiken met echte exports
 

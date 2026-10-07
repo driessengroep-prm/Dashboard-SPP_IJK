@@ -53,7 +53,8 @@ export function Dashboard() {
   }, [ds, rollen, versie]);
 
   const regels = useMemo(() => data?.regels ?? [], [data]);
-  const basis: Basis = params.get('basis') === 'alle' ? 'alle' : 'gescoord';
+  // Default: percentages of all employees; ?basis=gescoord switches to the scored employees
+  const basis: Basis = params.get('basis') === 'gescoord' ? 'gescoord' : 'alle';
 
   // Filter options cascade: company → department → manager → employee
   const opties = useMemo(() => {
@@ -226,9 +227,9 @@ export function Dashboard() {
         <div className="filter-acties">
           <label className="filter inline" title="Waarover worden de percentages berekend?">
             <span>Percentages van</span>
-            <select value={basis} onChange={(e) => zet({ basis: e.target.value === 'alle' ? ['alle'] : [] })}>
-              <option value="gescoord">gescoorde medewerkers</option>
+            <select value={basis} onChange={(e) => zet({ basis: e.target.value === 'gescoord' ? ['gescoord'] : [] })}>
               <option value="alle">alle medewerkers</option>
+              <option value="gescoord">gescoorde medewerkers</option>
             </select>
           </label>
           <button className="knop-link" disabled={nFilters === 0} onClick={() => zet({ bedrijf: [], afdeling: [], leidinggevende: [], medewerker: [], kwadrant: [] })}>
@@ -257,7 +258,7 @@ export function Dashboard() {
                 <h2>SPP-matrix</h2>
               </div>
               <p className="subtiel klein">Aantal medewerkers per kwadrant in de selectie. Klik op een kwadrant om de medewerkers te tonen.</p>
-              <KwadrantMatrix v={totaal} actief={gekozen} onKies={wisselKwadrant} />
+              <KwadrantMatrix v={totaal} basis={basis} actief={gekozen} onKies={wisselKwadrant} />
             </section>
             <Vergelijking groepen={groepen} totaal={totaal} basis={basis} startKwadrant={gekozen[0] ?? 'talent'} onKies={kiesGroep} />
           </div>
