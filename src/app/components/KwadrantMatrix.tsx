@@ -1,15 +1,16 @@
 import { pct, type Verdeling } from '../../core/aggregate';
 import { KWADRANTEN, KWADRANT_ACTIE, MATRIX_ASSEN, MATRIX_POSITIE, STATUS_LABELS, type SppStatus } from '../../core/config/kwadranten';
-import { fmt } from './Kwadrant';
+import { deel, fmt, type Basis } from './Kwadrant';
 
 // Blad and Zon are too light for white numbers; they get dark (Lucht) text instead
 const DONKERE_TEKST = new Set<SppStatus>(['talent', 'vraagteken', 'niet_gescoord']);
 
 /**
  * The 2×2 SPP matrix (prestatie × groeiruimte): number of employees per quadrant and their
- * share of the scored employees. Clicking a quadrant toggles the quadrant filter.
+ * share (of all or of the scored employees, following the chosen basis). Clicking a quadrant toggles the quadrant filter.
  */
-export function KwadrantMatrix({ v, actief, onKies }: { v: Verdeling; actief: SppStatus[]; onKies: (s: SppStatus) => void }) {
+export function KwadrantMatrix(props: { v: Verdeling; basis: Basis; actief: SppStatus[]; onKies: (s: SppStatus) => void }) {
+  const { v, basis, actief, onKies } = props;
   return (
     <>
       <div className="matrix-raster">
@@ -57,7 +58,9 @@ export function KwadrantMatrix({ v, actief, onKies }: { v: Verdeling; actief: Sp
                   ))}
                 </span>
                 <span className="matrix-actie">({KWADRANT_ACTIE[k]})</span>
-                <span className="matrix-pct">{fmt(pct(v.telling[k], v.gescoord))}% van gescoord</span>
+                <span className="matrix-pct">
+                  {fmt(deel(v, k, basis))}% van {basis === 'gescoord' ? 'gescoorde' : 'alle'} medewerkers
+                </span>
               </span>
             </button>
           );
