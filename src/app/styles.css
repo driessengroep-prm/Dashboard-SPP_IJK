@@ -546,6 +546,15 @@ button.tegel:hover {
   font-size: 0.8rem;
   color: var(--inkt-3);
 }
+/* Dashboard key figures: centred, with the numbers on one line even when a label wraps */
+.dashboard .tegel {
+  align-items: center;
+  text-align: center;
+}
+.dashboard .tegel-label {
+  justify-content: center;
+  min-height: 2.6em;
+}
 .sr-only {
   position: absolute;
   width: 1px;
