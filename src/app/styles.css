@@ -635,34 +635,45 @@ button.tegel:hover {
   border-radius: 4px;
 }
 
-/* SPP matrix (2×2) */
-.matrix-wrap {
+/* SPP matrix (2×2): prestatie horizontally, groeiruimte vertically (low at the top) */
+.matrix-raster {
   display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-rows: 1fr auto;
+  grid-template-columns: auto auto 1fr 1fr;
+  grid-template-rows: auto auto minmax(130px, 1fr) minmax(130px, 1fr);
   gap: 6px;
 }
-.matrix-as-y {
+.matrix-as-titel {
+  font-family: var(--font-kop);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-align: center;
+  color: var(--inkt);
+}
+.matrix-as-titel span {
+  font-family: var(--font-tekst);
+  font-weight: 400;
+  color: var(--inkt-2);
+  font-size: 0.8rem;
+}
+.matrix-as-titel.x {
+  grid-row: 1;
+  grid-column: 3 / 5;
+}
+.matrix-as-titel.y {
+  grid-row: 3 / 5;
+  grid-column: 1;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  text-align: center;
-  font-size: 0.8rem;
-  color: var(--inkt-2);
-  letter-spacing: 0.02em;
 }
-.matrix-as-x {
-  grid-column: 2;
-  text-align: center;
+.matrix-as-niveau {
   font-size: 0.8rem;
+  font-style: italic;
+  font-weight: 600;
   color: var(--inkt-2);
-  letter-spacing: 0.02em;
+  text-align: center;
 }
-.spp-matrix {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 6px;
-  min-height: 300px;
+.matrix-as-niveau.rij {
+  align-self: center;
 }
 .matrix-cel {
   font: inherit;
@@ -719,10 +730,15 @@ button.tegel:hover {
   min-width: 0;
 }
 .matrix-label {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   font-family: var(--font-kop);
   font-weight: 700;
   line-height: 1.2;
+}
+.matrix-actie {
+  font-size: 0.85rem;
+  color: var(--inkt-2);
+  font-style: italic;
 }
 .matrix-pct {
   font-size: 0.85rem;
@@ -992,8 +1008,8 @@ td {
   .hero::after {
     width: 30%;
   }
-  .spp-matrix {
-    min-height: 0;
+  .matrix-raster {
+    grid-template-rows: auto auto auto auto;
   }
   .matrix-cel {
     flex-direction: column;

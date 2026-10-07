@@ -132,10 +132,10 @@ async function schrijfHr(medewerkers: Mw[]) {
   ws.addRow(['Lijst FvB — medewerkers in dienst (FICTIEF)']);
   ws.addRow(['Peildatum: 01-10-2026']);
   ws.addRow([]);
-  ws.addRow(['Personeelsnummer', 'Naam', 'E-mail werk', 'Werkgevernaam', 'Org. eenheid omschrijving', 'Leidinggevende', 'Functie']);
+  // Like the real export: no personnel number column (matching is done on name)
+  ws.addRow(['Naam', 'E-mail werk', 'Werkgevernaam', 'Org. eenheid omschrijving', 'Leidinggevende', 'Functie']);
   medewerkers.forEach((m, i) => {
     ws.addRow([
-      m.personeelsnummer,
       m.naam,
       i % 23 === 0 ? m.email.toUpperCase() : m.email,
       m.bedrijf.werkgevernaam,
@@ -167,7 +167,6 @@ async function main() {
   });
 
   // Edge cases
-  spp[30][0] = 99999; // personnel number not in the HR list: matched on name instead
   spp.push([90001, 'Stagiair Extern', 'IJK B.V.', medewerkers[0].leidinggevende, 'Vraagteken']); // not in the HR list
   spp.push([90002, 'Oud Medewerker', 'Driessen B.V.', medewerkers[1].leidinggevende, '']); // not in the HR list, not scored
   const dubbel = medewerkers[5];

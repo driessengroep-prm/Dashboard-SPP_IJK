@@ -27,15 +27,26 @@ export const KORTE_LABELS: Record<SppStatus, string> = {
 };
 
 /**
- * Position in the 2×2 SPP matrix. Assumption (adjust here if the IJK model differs):
- * horizontal = current performance (functioneren), vertical = potential (ontwikkelpotentieel).
+ * The 2×2 SPP matrix as used at the Driessen Groep ("Potentieel en prestatiematrix"):
+ * horizontal = prestatie (low → high), vertical = groeiruimte (low at the top → high at the bottom).
  */
-export const MATRIX_ASSEN = { x: 'Functioneren', y: 'Potentieel' };
+export const MATRIX_ASSEN = {
+  x: { titel: 'Prestatie', toelichting: 'willen en kunnen' },
+  y: { titel: 'Groeiruimte', toelichting: 'willen en kunnen' },
+};
 export const MATRIX_POSITIE: Record<Kwadrant, { rij: 1 | 2; kolom: 1 | 2 }> = {
-  vraagteken: { rij: 1, kolom: 1 },
-  talent: { rij: 1, kolom: 2 },
-  achterblijver: { rij: 2, kolom: 1 },
-  vaste_waarde: { rij: 2, kolom: 2 },
+  achterblijver: { rij: 1, kolom: 1 },
+  vaste_waarde: { rij: 1, kolom: 2 },
+  vraagteken: { rij: 2, kolom: 1 },
+  talent: { rij: 2, kolom: 2 },
+};
+
+/** What each quadrant asks of the manager (from the matrix). */
+export const KWADRANT_ACTIE: Record<Kwadrant, string> = {
+  achterblijver: 'eerlijke aandacht',
+  vaste_waarde: 'koesteren',
+  vraagteken: 'uitdagen',
+  talent: 'faciliteren',
 };
 
 const normaliseer = (s: string) =>
