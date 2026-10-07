@@ -26,6 +26,17 @@ describe('koppel', () => {
     expect(r.uitzonderingen).toEqual([]);
   });
 
+  it('uses the company from the SPP export for unmatched rows', () => {
+    const r = koppel([spp('Nieuw Iemand', 'Talent', { personeelsnummer: '9', bedrijf: 'IJK B.V.' })], [hr('Ander')]);
+    expect(r.regels[0]).toMatchObject({ bedrijfCode: 'ijk', werkgevernaam: 'IJK B.V.', inHr: false });
+  });
+
+  it('falls back to the name when the personnel number is unknown', () => {
+    const r = koppel([spp('Anna Test', 'Talent', { personeelsnummer: '999' })], [hr('Anna Test', { personeelsnummer: '1' })]);
+    expect(r.regels[0].inHr).toBe(true);
+    expect(r.samenvatting.perWijze.naam).toBe(1);
+  });
+
   it('keeps unmatched SPP rows with an unknown company and reports them', () => {
     const r = koppel([spp('Onbekend Iemand', 'Achterblijver')], [hr('Ander')]);
     expect(r.regels[0]).toMatchObject({ bedrijfCode: null, inHr: false, status: 'achterblijver' });

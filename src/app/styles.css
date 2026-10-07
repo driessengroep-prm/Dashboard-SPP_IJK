@@ -101,9 +101,9 @@ h2 {
   color: var(--blad);
   text-decoration: none;
 }
-.kop-merk svg {
+.kop-merk img {
   display: block;
-  height: 38px;
+  height: 40px;
   width: auto;
 }
 .kop-merk-tekst {

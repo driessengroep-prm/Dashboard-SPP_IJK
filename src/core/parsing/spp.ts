@@ -1,18 +1,21 @@
-import type { SppRij, Tabel } from '../types';
+import { mapKwadrant } from '../config/kwadranten';
+import type { Cel, SppRij, Tabel } from '../types';
 import { ParseFout, celTekst, isLegeRij, kolomIndices, normaliseerEmail, normaliseerPersoneelsnummer, vindKoprij, type KolomDef } from './tabel';
 
+type SppKolom = 'naam' | 'email' | 'personeelsnummer' | 'bedrijf' | 'leidinggevende' | 'kwadrant';
+
 /**
- * Accepted column headers of the SPP export. The exact naming of the real export is not
- * fixed yet, so several common variants are accepted (case, spaces and a trailing
- * period are ignored). Add a variant here when the export uses another header.
+ * Accepted column headers when the SPP export has a header row (case, spaces and a
+ * trailing period are ignored). Add a variant here when the export uses another header.
  */
-export const SPP_KOLOMMEN: Record<'naam' | 'email' | 'personeelsnummer' | 'leidinggevende' | 'kwadrant', KolomDef> = {
+export const SPP_KOLOMMEN: Record<SppKolom, KolomDef> = {
   naam: { namen: ['Naam', 'Naam medewerker', 'Medewerker', 'Werknemer', 'Naam werknemer', 'Volledige naam'], verplicht: true },
   email: { namen: ['E-mail werk', 'E-mail', 'Email', 'E-mailadres', 'Emailadres', 'E-mail medewerker', 'Zakelijk e-mailadres'], verplicht: false },
   personeelsnummer: {
-    namen: ['Personeelsnummer', 'Personeelsnr', 'Pers.nr', 'Pers. nr', 'Medewerkernummer', 'Werknemersnummer'],
+    namen: ['Personeelsnummer', 'Personeelsnr', 'Pers.nr', 'Pers. nr', 'Pnr', 'Nummer', 'Nr', 'Medewerkernummer', 'Werknemersnummer'],
     verplicht: false,
   },
+  bedrijf: { namen: ['Bedrijf', 'Werkgever', 'Werkgevernaam', 'Bedrijfsnaam'], verplicht: false },
   leidinggevende: { namen: ['Leidinggevende', 'Naam leidinggevende', 'Leidinggevende naam', 'Manager'], verplicht: false },
   kwadrant: {
     namen: ['SPP-kwadrant', 'SPP kwadrant', 'Kwadrant', 'SPP', 'SPP-score', 'SPP score', 'SPP-positie', 'Score', 'Positie', 'Plot', 'Categorie'],
@@ -20,35 +23,91 @@ export const SPP_KOLOMMEN: Record<'naam' | 'email' | 'personeelsnummer' | 'leidi
   },
 };
 
+/**
+ * Column layout of the SPP export without a header row (as delivered):
+ * A personnel number · B name · C company · D manager · E quadrant.
+ */
+export const SPP_VASTE_INDELING: Record<Exclude<SppKolom, 'email'>, number> = {
+  personeelsnummer: 0,
+  naam: 1,
+  bedrijf: 2,
+  leidinggevende: 3,
+  kwadrant: 4,
+};
+
 export interface SppResultaat {
   rijen: SppRij[];
+  /** False when the export has no header row and the fixed column layout was used. */
+  heeftKopregel: boolean;
   heeftEmail: boolean;
   heeftPersoneelsnummer: boolean;
   heeftLeidinggevende: boolean;
 }
 
+const isKwadrant = (c: Cel | undefined) => {
+  const s = mapKwadrant(celTekst(c));
+  return s !== null && s !== 'niet_gescoord';
+};
+const isNummer = (c: Cel | undefined) => /^\d+$/.test(normaliseerPersoneelsnummer(c ?? null) ?? '');
+
 export function parseSpp(tabel: Tabel): SppResultaat {
   const kopIdx = vindKoprij(tabel, SPP_KOLOMMEN.kwadrant.namen);
-  if (kopIdx < 0) {
-    throw new ParseFout(`SPP-export: geen koprij gevonden met een kolom voor het kwadrant (${SPP_KOLOMMEN.kwadrant.namen.map((n) => `"${n}"`).join(', ')}).`);
-  }
+  return kopIdx >= 0 ? metKopregel(tabel, kopIdx) : zonderKopregel(tabel);
+}
+
+function metKopregel(tabel: Tabel, kopIdx: number): SppResultaat {
   const k = kolomIndices(tabel[kopIdx], SPP_KOLOMMEN, 'SPP-export');
+  const lees = (rij: Cel[], i: number) => (i >= 0 ? celTekst(rij[i]) : '');
   const rijen: SppRij[] = [];
   for (let i = kopIdx + 1; i < tabel.length; i++) {
     const rij = tabel[i] ?? [];
     if (isLegeRij(rij)) continue;
+    const r: SppRij = {
+      rijnummer: i + 1,
+      naam: lees(rij, k.naam),
+      email: normaliseerEmail(lees(rij, k.email)) || null,
+      personeelsnummer: k.personeelsnummer >= 0 ? normaliseerPersoneelsnummer(rij[k.personeelsnummer]) : null,
+      bedrijf: lees(rij, k.bedrijf),
+      leidinggevende: lees(rij, k.leidinggevende),
+      kwadrantRuw: lees(rij, k.kwadrant),
+    };
+    if (r.naam || r.email || r.personeelsnummer) rijen.push(r);
+  }
+  return { rijen, heeftKopregel: true, heeftEmail: k.email >= 0, heeftPersoneelsnummer: k.personeelsnummer >= 0, heeftLeidinggevende: k.leidinggevende >= 0 };
+}
+
+/**
+ * Export without a header row: fixed layout (SPP_VASTE_INDELING). Leading rows that do not
+ * look like data (no personnel number in A and no quadrant in E, e.g. a title or an
+ * unrecognised header) are skipped.
+ */
+function zonderKopregel(tabel: Tabel): SppResultaat {
+  const k = SPP_VASTE_INDELING;
+  const start = tabel.findIndex((rij) => isNummer(rij?.[k.personeelsnummer]) || isKwadrant(rij?.[k.kwadrant]));
+  const fout = () =>
+    new ParseFout(
+      'SPP-export: de kolommen zijn niet herkend. Verwacht wordt een kopregel met o.a. "Naam" en "Kwadrant", of zonder kopregel de kolommen ' +
+        'A personeelsnummer, B naam, C bedrijf, D leidinggevende en E kwadrant.',
+    );
+  if (start < 0) throw fout();
+  const rijen: SppRij[] = [];
+  for (let i = start; i < tabel.length; i++) {
+    const rij = tabel[i] ?? [];
+    if (isLegeRij(rij)) continue;
     const naam = celTekst(rij[k.naam]);
-    const email = k.email >= 0 ? normaliseerEmail(celTekst(rij[k.email])) || null : null;
-    const personeelsnummer = k.personeelsnummer >= 0 ? normaliseerPersoneelsnummer(rij[k.personeelsnummer]) : null;
-    if (!naam && !email && !personeelsnummer) continue;
+    const personeelsnummer = normaliseerPersoneelsnummer(rij[k.personeelsnummer]);
+    if (!naam && !personeelsnummer) continue;
     rijen.push({
       rijnummer: i + 1,
       naam,
-      email,
+      email: null,
       personeelsnummer,
-      leidinggevende: k.leidinggevende >= 0 ? celTekst(rij[k.leidinggevende]) : '',
+      bedrijf: celTekst(rij[k.bedrijf]),
+      leidinggevende: celTekst(rij[k.leidinggevende]),
       kwadrantRuw: celTekst(rij[k.kwadrant]),
     });
   }
-  return { rijen, heeftEmail: k.email >= 0, heeftPersoneelsnummer: k.personeelsnummer >= 0, heeftLeidinggevende: k.leidinggevende >= 0 };
+  // Sanity check: with this layout the personnel numbers are in A; otherwise it is another file
+  if (rijen.filter((r) => r.personeelsnummer && /^\d+$/.test(r.personeelsnummer)).length < rijen.length / 2) throw fout();
+  return { rijen, heeftKopregel: false, heeftEmail: false, heeftPersoneelsnummer: true, heeftLeidinggevende: true };
 }

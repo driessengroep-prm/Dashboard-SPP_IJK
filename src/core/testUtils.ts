@@ -26,6 +26,7 @@ export const spp = (naam: string, kwadrantRuw: string, extra: Partial<SppRij> = 
   naam,
   email: null,
   personeelsnummer: null,
+  bedrijf: '',
   leidinggevende: 'Baas',
   kwadrantRuw,
   ...extra,

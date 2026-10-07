@@ -14,7 +14,7 @@ export interface BeheerOverzicht {
   /** Contains personal data — beheerder only. */
   uitzonderingen: Uitzondering[];
   /** Which optional columns were found in the SPP export. */
-  sppKolommen: { email: boolean; personeelsnummer: boolean; leidinggevende: boolean };
+  sppKolommen: { kopregel: boolean; email: boolean; personeelsnummer: boolean; leidinggevende: boolean };
   bestanden: { spp: string; hr: string };
   bron: 'gebundeld' | 'upload';
   peildatum: Date | null;

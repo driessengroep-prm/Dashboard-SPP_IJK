@@ -2,7 +2,8 @@
  * Generates two fictitious .xlsx exports in testdata/fictief/:
  * - Lijst_FvB_<datum>.xlsx: the HR export, same structure as the real "Lijst FvB"
  *   (sheet "DG MW in dienst", title rows, columns) — identical to the AI & data dashboard;
- * - SPP_export_IJK_<datum>.xlsx: the SPP export (employee, e-mail, manager, quadrant).
+ * - SPP_export_IJK_<datum>.xlsx: the SPP export in the delivered format: no header row, columns
+ *   A personnel number · B name · C company · D manager · E quadrant.
  *
  * Companies, organisational units and headcounts follow the real structure
  * (scripts/data/organisatie-2026.ts); names, e-mail addresses, managers and quadrants are fictitious.
@@ -49,6 +50,7 @@ const ACHTERNAMEN = [
 const TUSSENVOEGSELS = ['', '', '', '', 'van', 'de', 'van der', 'van den', 'ter'];
 
 interface Mw {
+  personeelsnummer: number;
   naam: string;
   email: string;
   bedrijf: Bedrijf;
@@ -75,6 +77,7 @@ function maakMedewerkers(): Mw[] {
         } while (gebruikt.has(email));
         gebruikt.add(email);
         lijst.push({
+          personeelsnummer: 2000 + lijst.length,
           naam: `${voornaam} ${tv ? `${tv} ` : ''}${achternaam}`,
           email,
           bedrijf: b,
@@ -89,8 +92,8 @@ function maakMedewerkers(): Mw[] {
 
 // Spelling variants as they might appear in the export (the dashboard must recognise all of them)
 const SCHRIJFWIJZEN: Record<string, string[]> = {
-  talent: ['Talent/voorloper', 'Talent / Voorloper', 'Talent'],
-  vaste_waarde: ['Vaste waarde/sterkhouder', 'Vaste waarde', 'Sterkhouder'],
+  talent: ['Talent\\voorloper', 'Talent\\voorloper', 'Talent/voorloper', 'Talent'],
+  vaste_waarde: ['Vaste waarde\\sterkhouder', 'Vaste waarde\\sterkhouder', 'Vaste waarde/sterkhouder', 'Sterkhouder'],
   vraagteken: ['Vraagteken', 'vraagteken'],
   achterblijver: ['Achterblijver', 'ACHTERBLIJVER'],
 };
@@ -132,7 +135,7 @@ async function schrijfHr(medewerkers: Mw[]) {
   ws.addRow(['Personeelsnummer', 'Naam', 'E-mail werk', 'Werkgevernaam', 'Org. eenheid omschrijving', 'Leidinggevende', 'Functie']);
   medewerkers.forEach((m, i) => {
     ws.addRow([
-      100000 + i,
+      m.personeelsnummer,
       m.naam,
       i % 23 === 0 ? m.email.toUpperCase() : m.email,
       m.bedrijf.werkgevernaam,
@@ -144,15 +147,12 @@ async function schrijfHr(medewerkers: Mw[]) {
   await wb.xlsx.writeFile(join(OUT_DIR, DEMO_HR_BESTAND));
 }
 
-type SppRegel = [naam: string, email: string, leidinggevende: string, kwadrant: string];
+type SppRegel = [personeelsnummer: number | null, naam: string, bedrijf: string, leidinggevende: string, kwadrant: string];
 
 async function schrijfSpp(rijen: SppRegel[]) {
   const wb = nieuwWerkboek();
-  const ws = wb.addWorksheet('SPP');
-  ws.addRow(['Strategische personeelsplanning — export (FICTIEF)']);
-  ws.addRow(['Gegenereerd op 01-10-2026']);
-  ws.addRow([]);
-  ws.addRow(['Medewerker', 'E-mail', 'Leidinggevende', 'SPP-kwadrant']);
+  const ws = wb.addWorksheet('Blad1');
+  // Like the delivered export: no title or header row, data starts in row 1
   for (const r of rijen) ws.addRow(r);
   await wb.xlsx.writeFile(join(OUT_DIR, DEMO_SPP_BESTAND));
 }
@@ -160,24 +160,19 @@ async function schrijfSpp(rijen: SppRegel[]) {
 async function main() {
   mkdirSync(OUT_DIR, { recursive: true });
   const medewerkers = maakMedewerkers();
-  const spp: SppRegel[] = [];
-
-  medewerkers.forEach((m, i) => {
+  const spp: SppRegel[] = medewerkers.map((m) => {
     const p = profiel(`${m.bedrijf.code}|${m.afdeling}`);
     const kwadrant = rnd() < p.gescoord ? pick(SCHRIJFWIJZEN[kiesKwadrant(p.gewichten)]) : '';
-    // Edge case: no e-mail address in the SPP row (matched on name instead)
-    const email = i % 41 === 7 ? '' : i % 13 === 0 ? ` ${m.email.toUpperCase()}` : m.email;
-    spp.push([m.naam, email, m.leidinggevende, kwadrant]);
+    return [m.personeelsnummer, m.naam, m.bedrijf.werkgevernaam, m.leidinggevende, kwadrant];
   });
 
   // Edge cases
-  spp.push(['Stagiair Extern', 'stagiair.extern@stage.example', medewerkers[0].leidinggevende, 'Vraagteken']); // not in the HR list
-  spp.push(['Oud Medewerker', 'oud.medewerker@driessen.example', medewerkers[1].leidinggevende, '']); // not in the HR list, not scored
+  spp[30][0] = 99999; // personnel number not in the HR list: matched on name instead
+  spp.push([90001, 'Stagiair Extern', 'IJK B.V.', medewerkers[0].leidinggevende, 'Vraagteken']); // not in the HR list
+  spp.push([90002, 'Oud Medewerker', 'Driessen B.V.', medewerkers[1].leidinggevende, '']); // not in the HR list, not scored
   const dubbel = medewerkers[5];
-  spp.push([dubbel.naam, dubbel.email, dubbel.leidinggevende, 'Talent/voorloper']); // duplicate row
-  const onbekend = medewerkers[142];
-  const idx = spp.findIndex((r) => r[1] === onbekend.email);
-  if (idx >= 0) spp[idx][3] = 'Ster'; // unknown quadrant value
+  spp.push([dubbel.personeelsnummer, dubbel.naam, dubbel.bedrijf.werkgevernaam, dubbel.leidinggevende, 'Talent\\voorloper']); // duplicate row
+  spp[142][4] = 'Ster'; // unknown quadrant value
 
   await schrijfHr(medewerkers);
   await schrijfSpp(spp);

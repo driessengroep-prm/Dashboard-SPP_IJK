@@ -30,8 +30,9 @@ describe('BrowserDataSource (demo)', () => {
     const d = await ds.getDashboard(['gebruiker']);
     expect(d.regels.length).toBe(835); // 836 rows minus one duplicate
     const b = (await ds.getBeheer(['beheerder']))!;
-    expect(new Set(b.uitzonderingen.map((u) => u.type))).toEqual(new Set(['geen_hr_match', 'spp_dubbel', 'onbekend_kwadrant', 'naam_dubbelzinnig']));
-    expect(b.samenvatting.perWijze.naam).toBeGreaterThan(10);
+    expect(new Set(b.uitzonderingen.map((u) => u.type))).toEqual(new Set(['geen_hr_match', 'spp_dubbel', 'onbekend_kwadrant']));
+    expect(b.samenvatting.perWijze).toEqual({ personeelsnummer: 833, email: 0, naam: 1 }); // incl. the duplicate row
+    expect(b.sppKolommen.kopregel).toBe(false);
     // Two external rows are not in the HR list; a row without e-mail may hit a name that occurs twice
     expect(b.samenvatting.gekoppeld).toBe(b.samenvatting.medewerkers - b.uitzonderingen.filter((u) => u.type === 'geen_hr_match' || u.type === 'naam_dubbelzinnig').length);
   });
@@ -46,13 +47,13 @@ describe('BrowserDataSource (demo)', () => {
     expect(b.bron).toBe('upload');
   });
 
-  it('refuses real e-mail addresses without echoing them, and SPP files without e-mail column', async () => {
+  it('refuses real e-mail addresses without echoing them, and SPP exports that do not fit the fictitious HR list', async () => {
     const echt = await werkboekMet([['Naam', 'E-mail', 'Kwadrant'], ['Jan', 'jan@echtbedrijf.nl', 'Talent']]);
     const err = await demo().upload(['beheerder'], alsFile(echt, 'spp.xlsx'), alsFile(leesFictiefHr(), 'hr.xlsx')).catch((e) => e);
     expect(err).toBeInstanceOf(UploadFout);
     expect(err.message).not.toContain('jan@echtbedrijf.nl');
-    const zonderMail = await werkboekMet([['Naam', 'Kwadrant'], ['Jan Jansen', 'Talent']]);
-    await expect(demo().upload(['beheerder'], alsFile(zonderMail, 'spp.xlsx'), alsFile(leesFictiefHr(), 'hr.xlsx'))).rejects.toThrow(/e-mailkolom/);
+    const echteSpp = await werkboekMet([[3345, 'Jan Janssen', 'IJK B.V.', 'Piet Pietersen', 'Talent\\voorloper']]);
+    await expect(demo().upload(['beheerder'], alsFile(echteSpp, 'spp.xlsx'), alsFile(leesFictiefHr(), 'hr.xlsx'))).rejects.toThrow(/sluit niet aan/);
   });
 
   it('refuses non-xlsx files', async () => {
@@ -61,6 +62,22 @@ describe('BrowserDataSource (demo)', () => {
 });
 
 describe('BrowserDataSource (local build)', () => {
+  it('accepts the delivered SPP format and matches on personnel number', async () => {
+    const ds = new BrowserDataSource({ alleenFictief: false });
+    const sppBestand = await werkboekMet([[3345, 'Jan Janssen', 'IJK B.V.', 'Piet Pietersen', 'Talent\\voorloper']]);
+    const hrBestand2 = await werkboekMet(
+      [
+        ['Personeelsnummer', 'Naam', 'E-mail werk', 'Werkgevernaam', 'Org. eenheid omschrijving'],
+        [3345, 'Jan Janssen', 'jan@bedrijf.nl', 'IJK B.V.', 'IJK - Directie'],
+      ],
+      'DG MW in dienst',
+    );
+    const b = await ds.upload(['beheerder'], alsFile(sppBestand, 'spp.xlsx'), alsFile(hrBestand2, 'hr.xlsx'));
+    expect(b.samenvatting.perWijze.personeelsnummer).toBe(1);
+    const d = await ds.getDashboard(['gebruiker']);
+    expect(d.regels[0]).toMatchObject({ naam: 'Jan Janssen', afdeling: 'IJK - Directie', leidinggevende: 'Piet Pietersen', status: 'talent' });
+  });
+
   it('starts empty and accepts real exports, matching on name', async () => {
     const ds = new BrowserDataSource({ alleenFictief: false });
     expect(await ds.getDashboard(['beheerder'])).toMatchObject({ regels: [], geenDataset: true });

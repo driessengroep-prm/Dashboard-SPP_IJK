@@ -19,9 +19,10 @@ describe('parseSpp', () => {
   it('finds the header dynamically and accepts header variants', () => {
     const r = parseSpp(tabel);
     expect(r.heeftEmail && r.heeftPersoneelsnummer && r.heeftLeidinggevende).toBe(true);
+    expect(r.heeftKopregel).toBe(true);
     expect(r.rijen).toEqual([
-      { rijnummer: 4, naam: 'Anna Test', email: 'anna@ijk.example', personeelsnummer: '123', leidinggevende: 'Bea Baas', kwadrantRuw: 'Talent' },
-      { rijnummer: 6, naam: 'Bob Test', email: null, personeelsnummer: '124', leidinggevende: 'Bea Baas', kwadrantRuw: '' },
+      { rijnummer: 4, naam: 'Anna Test', email: 'anna@ijk.example', personeelsnummer: '123', bedrijf: '', leidinggevende: 'Bea Baas', kwadrantRuw: 'Talent' },
+      { rijnummer: 6, naam: 'Bob Test', email: null, personeelsnummer: '124', bedrijf: '', leidinggevende: 'Bea Baas', kwadrantRuw: '' },
     ]);
   });
 
@@ -29,8 +30,25 @@ describe('parseSpp', () => {
     expect(JSON.stringify(parseSpp(tabel))).not.toContain('geheime notitie');
   });
 
-  it('throws a clear error without quadrant or name column', () => {
-    expect(() => parseSpp([['Naam', 'E-mail']])).toThrow(ParseFout);
+  it('reads the delivered export without header row (A nr · B naam · C bedrijf · D leidinggevende · E kwadrant)', () => {
+    const r = parseSpp([
+      [3345, 'Jan Janssen', 'IJK B.V.', 'Piet Pietersen', 'Talent\\voorloper'],
+      ['3346', 'Kees de Vries', 'IJK B.V.', 'Piet Pietersen', null],
+    ]);
+    expect(r.heeftKopregel).toBe(false);
+    expect(r.rijen).toEqual([
+      { rijnummer: 1, naam: 'Jan Janssen', email: null, personeelsnummer: '3345', bedrijf: 'IJK B.V.', leidinggevende: 'Piet Pietersen', kwadrantRuw: 'Talent\\voorloper' },
+      { rijnummer: 2, naam: 'Kees de Vries', email: null, personeelsnummer: '3346', bedrijf: 'IJK B.V.', leidinggevende: 'Piet Pietersen', kwadrantRuw: '' },
+    ]);
+  });
+
+  it('skips an unrecognised title/header row in the fixed layout', () => {
+    const r = parseSpp([['SPP-overzicht'], ['Nr.', 'Wie', 'Waar', 'Baas', 'Plek'], [3345, 'Jan Janssen', 'IJK B.V.', 'Piet', 'Vraagteken']]);
+    expect(r.rijen.map((x) => x.rijnummer)).toEqual([3]);
+  });
+
+  it('throws a clear error when the columns are not recognised', () => {
+    expect(() => parseSpp([['Naam', 'E-mail'], ['Jan', 'jan@x.example']])).toThrow(/niet herkend/);
     expect(() => parseSpp([['E-mail', 'Kwadrant']])).toThrow(/Naam/);
   });
 });
@@ -84,9 +102,10 @@ describe('normalisation', () => {
 
 describe('xlsx parsing of the generated fictitious exports', () => {
   it('reads the SPP export', async () => {
-    const { rijen } = parseSpp(await leesWerkblad(leesFictiefSpp(), null, SPP_KOLOMMEN.kwadrant.namen));
-    expect(rijen.length).toBe(836);
-    expect(rijen.every((r) => !r.email || r.email.endsWith('.example'))).toBe(true);
+    const r = parseSpp(await leesWerkblad(leesFictiefSpp(), null, SPP_KOLOMMEN.kwadrant.namen, { eersteAlsTerugval: true }));
+    expect(r.heeftKopregel).toBe(false);
+    expect(r.rijen.length).toBe(836);
+    expect(r.rijen.every((x) => x.personeelsnummer && x.bedrijf)).toBe(true);
   });
 
   it('reads the HR export', async () => {

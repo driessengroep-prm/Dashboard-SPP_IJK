@@ -75,13 +75,19 @@ export function Beheer() {
               waarde={overzicht.samenvatting.gekoppeld}
               toelichting={`${overzicht.samenvatting.perWijze.personeelsnummer} op personeelsnummer · ${overzicht.samenvatting.perWijze.email} op e-mail · ${overzicht.samenvatting.perWijze.naam} op naam`}
             />
-            <Tegel label="Niet gekoppeld" waarde={overzicht.samenvatting.nietGekoppeld} toelichting="getoond als onbekend bedrijf/afdeling" />
+            <Tegel label="Niet gekoppeld" waarde={overzicht.samenvatting.nietGekoppeld} toelichting="getoond met onbekende afdeling (bedrijf uit de SPP-export)" />
             <Tegel
               label="HR-medewerkers niet in SPP-export"
               waarde={overzicht.samenvatting.hrNietInSpp}
               toelichting={`van ${overzicht.samenvatting.hrMedewerkers} in de HR-lijst; niet in het dashboard`}
             />
           </section>
+          {!overzicht.sppKolommen.kopregel && (
+            <p className="subtiel klein">
+              De SPP-export heeft geen (herkende) kopregel; de vaste indeling is gebruikt: A personeelsnummer, B naam, C bedrijf, D leidinggevende, E
+              kwadrant.
+            </p>
+          )}
           {!overzicht.sppKolommen.email && !overzicht.sppKolommen.personeelsnummer && (
             <p className="waarschuwing">
               De SPP-export heeft geen kolom met e-mailadres of personeelsnummer; er is gekoppeld op naam. Dat werkt, maar namen die vaker voorkomen
@@ -164,10 +170,14 @@ function Upload({ onKlaar }: { onKlaar: (o: BeheerOverzicht) => void }) {
         <summary>Welke kolommen worden gelezen?</summary>
         <p className="subtiel klein">Alleen deze kolommen worden ingelezen; alle andere kolommen worden genegeerd. Hoofdletters en spaties maken niet uit.</p>
         <ul className="kolomlijst">
-          <li>SPP-export, naam medewerker (verplicht): {kolomNamen('naam')}</li>
-          <li>SPP-export, kwadrant (verplicht): {kolomNamen('kwadrant')}. Leeg = niet gescoord.</li>
-          <li>SPP-export, leidinggevende: {kolomNamen('leidinggevende')}</li>
-          <li>SPP-export, voor de koppeling (aanbevolen): {kolomNamen('personeelsnummer')} of {kolomNamen('email')}</li>
+          <li>
+            SPP-export zonder kopregel (zoals de standaardexport): A personeelsnummer, B naam, C bedrijf, D leidinggevende, E kwadrant. De koppeling met
+            de HR-export gaat dan op personeelsnummer.
+          </li>
+          <li>SPP-export mét kopregel, naam medewerker (verplicht): {kolomNamen('naam')}</li>
+          <li>SPP-export mét kopregel, kwadrant (verplicht): {kolomNamen('kwadrant')}. Leeg = niet gescoord.</li>
+          <li>SPP-export mét kopregel, bedrijf: {kolomNamen('bedrijf')}; leidinggevende: {kolomNamen('leidinggevende')}</li>
+          <li>SPP-export mét kopregel, voor de koppeling (aanbevolen): {kolomNamen('personeelsnummer')} of {kolomNamen('email')}</li>
           <li>HR-export (werkblad "DG MW in dienst"): "Naam", "E-mail werk", "Personeelsnummer", "Werkgevernaam", "Org. eenheid omschrijving"</li>
         </ul>
       </details>

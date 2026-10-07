@@ -4,10 +4,10 @@ import type { Rol } from '../core/roles';
 import { IS_DEMO, IS_LOKAAL, maakDataSource } from '../data';
 import type { DataSource } from '../data/types';
 import { AppContext, type AppState } from './AppContext';
-import { IjkLogo } from './components/IjkLogo';
 import { RolKiezer } from './components/RolKiezer';
 import { Beheer } from './pages/Beheer';
 import { Dashboard } from './pages/Dashboard';
+import logo from './assets/logo-ijk.png';
 
 export function App() {
   const [ds, setDs] = useState<DataSource | null>(null);
@@ -35,7 +35,7 @@ export function App() {
         <header className="kop">
           <div className="kop-inner">
             <NavLink to="/" className="kop-merk" aria-label="IJK – Dashboard SPP">
-              <IjkLogo />
+              <img src={logo} alt="IJK" width={249} height={167} />
               <span className="kop-merk-tekst">
                 Dashboard SPP
                 <small>Strategische personeelsplanning</small>

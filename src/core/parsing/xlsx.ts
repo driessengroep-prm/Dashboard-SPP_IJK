@@ -52,17 +52,26 @@ export async function laadWerkboek(invoer: Invoer): Promise<ExcelJS.Workbook> {
 
 /**
  * Reads the preferred worksheet. When it does not exist, falls back to the first
- * worksheet that contains the required header cell.
+ * worksheet that contains the required header cell; with `eersteAlsTerugval` (exports
+ * without a header row) to the first worksheet that contains any data.
  */
-export async function leesWerkblad(invoer: Invoer, werkblad: string | null, verplichteKop: string | readonly string[]): Promise<Tabel> {
+export async function leesWerkblad(
+  invoer: Invoer,
+  werkblad: string | null,
+  verplichteKop: string | readonly string[],
+  opties: { eersteAlsTerugval?: boolean } = {},
+): Promise<Tabel> {
   const wb = await laadWerkboek(invoer);
   const voorkeur = werkblad ? wb.getWorksheet(werkblad) : undefined;
   if (voorkeur) return werkbladNaarTabel(voorkeur);
-  for (const ws of wb.worksheets) {
-    const t = werkbladNaarTabel(ws);
-    if (vindKoprij(t, verplichteKop) >= 0) return t;
-  }
-  throw new ParseFout(`Geen werkblad gevonden met een kolom ${typeof verplichteKop === 'string' ? `"${verplichteKop}"` : verplichteKop.map((k) => `"${k}"`).join(' of ')}.`);
+  const tabellen = wb.worksheets.map(werkbladNaarTabel);
+  const metKop = tabellen.find((t) => vindKoprij(t, verplichteKop) >= 0);
+  if (metKop) return metKop;
+  const metData = tabellen.find((t) => t.some((rij) => rij.some((c) => c !== null && c !== '')));
+  if (opties.eersteAlsTerugval && metData) return metData;
+  throw new ParseFout(
+    `Geen werkblad gevonden met een kolom ${typeof verplichteKop === 'string' ? `"${verplichteKop}"` : verplichteKop.map((k) => `"${k}"`).join(' of ')}.`,
+  );
 }
 
 /** All cells of all worksheets, used by the demo upload guard. */

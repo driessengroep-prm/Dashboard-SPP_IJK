@@ -6,22 +6,23 @@ Interne webtool van IJK (Driessen Groep) voor de **strategische personeelsplanni
 >
 > De demo bevat uitsluitend **fictieve gegevens**. Upload daar nooit echte exports; gebruik daarvoor de lokale versie (zie hieronder).
 
-Opgezet op dezelfde manier als het dashboard AI & data trainingsprogramma, in de huisstijl van IJK (huisstijlhandboek versie 08-2025).
+Opgezet op dezelfde manier als het dashboard AI & data trainingsprogramma, in de huisstijl van IJK (huisstijlhandboek versie 08-2025). Het logo staat in `src/app/assets/logo-ijk.png` (bijgesneden uit `Logo IJK.png`).
 
 ## Invoer
 
 De beheerder uploadt op de beheerpagina twee Excel-exports:
 
-1. **SPP-export**: medewerkers, hun leidinggevende en (indien gescoord) het kwadrant. De kopnamen mogen variëren; deze worden herkend (hoofdletters/spaties maken niet uit):
-   - naam (verplicht): `Naam`, `Naam medewerker`, `Medewerker`, `Werknemer`, …
-   - kwadrant (verplicht): `SPP-kwadrant`, `Kwadrant`, `SPP`, `Score`, `Positie`, … Een lege cel = niet gescoord;
-   - leidinggevende: `Leidinggevende`, `Naam leidinggevende`, `Manager`;
-   - voor de koppeling (aanbevolen): `Personeelsnummer` en/of `E-mail`.
+1. **SPP-export**: medewerkers, hun leidinggevende en (indien gescoord) het kwadrant. Het standaardformaat heeft **geen kopregel** en deze vaste kolommen:
 
-   Kwadrantwaarden worden herkend ongeacht schrijfwijze: *Talent/voorloper* (ook "Talent", "Voorloper"), *Vaste waarde/sterkhouder* (ook "Vaste waarde", "Sterkhouder"), *Vraagteken* en *Achterblijver*. Een onbekende waarde telt als niet gescoord en komt op de uitzonderingenlijst. De volledige lijst met kopnamen staat in `src/core/parsing/spp.ts`.
+   | A | B | C | D | E |
+   |---|---|---|---|---|
+   | personeelsnummer | naam | bedrijf | leidinggevende | kwadrant |
+   | 3345 | Jan Janssen | IJK B.V. | Piet Pietersen | Talent\\voorloper |
+
+   Een lege cel in kolom E = niet gescoord. Kwadrantwaarden worden herkend ongeacht schrijfwijze (`\\`, `/`, hoofdletters): *Talent/voorloper* (ook "Talent", "Voorloper"), *Vaste waarde/sterkhouder* (ook "Vaste waarde", "Sterkhouder"), *Vraagteken* en *Achterblijver*. Een onbekende waarde telt als niet gescoord en komt op de uitzonderingenlijst. Een export mét kopregel (bijv. "Naam", "Kwadrant", "Leidinggevende", "Personeelsnummer") wordt ook herkend; zie `src/core/parsing/spp.ts`.
 2. **HR-export** ("Lijst FvB", werkblad "DG MW in dienst"): exact hetzelfde bestand als bij het dashboard AI & data trainingsprogramma. Gelezen worden `Naam`, `E-mail werk`, `Personeelsnummer`, `Werkgevernaam` en `Org. eenheid omschrijving`.
 
-**Koppeling:** per SPP-regel op personeelsnummer, anders op e-mail, anders op naam (ook "Achternaam, Voornaam"). De SPP-export bepaalt wie er in het dashboard staat. Wie niet in de HR-lijst staat, blijft zichtbaar als "Onbekend (niet in HR-lijst)" en komt op de uitzonderingenlijst, net als namen die meerdere keren in de HR-lijst voorkomen en dubbele SPP-regels.
+**Koppeling:** per SPP-regel op personeelsnummer, anders op e-mail, anders op naam (ook "Achternaam, Voornaam"). De SPP-export bepaalt wie er in het dashboard staat. Wie niet in de HR-lijst staat, blijft zichtbaar met het bedrijf uit de SPP-export en afdeling "Onbekend (niet in HR-lijst)" en komt op de uitzonderingenlijst, net als namen die meerdere keren in de HR-lijst voorkomen en dubbele SPP-regels.
 
 ## Wat het dashboard laat zien
 
@@ -63,13 +64,13 @@ Vereist: Node.js 20 of hoger (CI gebruikt 22).
 | `npm run privacy-check` | Privacycheck op de repo en `dist/` |
 | `npm run testdata` | Fictieve testdata opnieuw genereren in `testdata/fictief/` |
 
-De fictieve testdata volgt de echte structuur van bedrijven en OE's (833 medewerkers bij 14 bedrijven) met verzonnen namen, leidinggevenden en kwadranten; alle e-mailadressen eindigen op `.example`. Bewuste randgevallen: verschillende schrijfwijzen van kwadranten, SPP-regels zonder e-mail (koppeling op naam), dubbele namen, een onbekende kwadrantwaarde, een dubbele SPP-regel en twee personen die niet in de HR-lijst staan.
+De fictieve testdata volgt de echte structuur van bedrijven en OE's (833 medewerkers bij 14 bedrijven) met verzonnen namen, leidinggevenden en kwadranten; alle e-mailadressen eindigen op `.example`. De fictieve SPP-export heeft hetzelfde formaat als de echte (geen kopregel, kolommen A–E). Bewuste randgevallen: verschillende schrijfwijzen van kwadranten, een onbekend personeelsnummer (koppeling op naam), een onbekende kwadrantwaarde, een dubbele SPP-regel en twee personen die niet in de HR-lijst staan.
 
 ## Publicatie (GitHub Pages)
 
 Elke push naar `main` draait `.github/workflows/pages.yml`: tests → privacycheck → demo-build → privacycheck op de build → deploy. Faalt een stap, dan wordt er niet gedeployed. Zet in de repo-instellingen onder *Settings → Pages* de bron op **GitHub Actions**.
 
-De privacycheck laat de build falen bij `.xlsx`/`.xls`/`.csv` buiten `testdata/fictief/`, bij e-mailadressen die niet op `.example` eindigen in de build en bij iets dat op een sleutel of geheim lijkt. De demo-upload weigert bestanden met echte e-mailadressen en SPP-bestanden zonder e-mailkolom.
+De privacycheck laat de build falen bij `.xlsx`/`.xls`/`.csv` buiten `testdata/fictief/`, bij e-mailadressen die niet op `.example` eindigen in de build en bij iets dat op een sleutel of geheim lijkt. De demo-upload weigert bestanden met echte e-mailadressen en een SPP-export die niet aansluit op de fictieve HR-lijst (minder dan 90% gekoppeld).
 
 ## Structuur
 

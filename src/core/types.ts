@@ -26,6 +26,8 @@ export interface SppRij {
   naam: string;
   email: string | null;
   personeelsnummer: string | null;
+  /** Company as stated in the SPP export ('' when absent); only used when the employee is not in the HR export. */
+  bedrijf: string;
   leidinggevende: string;
   /** Raw quadrant value as it appears in the export ('' when not scored). */
   kwadrantRuw: string;

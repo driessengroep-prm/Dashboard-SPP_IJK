@@ -5,6 +5,8 @@ describe('mapKwadrant', () => {
   it('recognises all quadrants regardless of spelling', () => {
     expect(mapKwadrant('Talent/voorloper')).toBe('talent');
     expect(mapKwadrant('Talent / Voorloper')).toBe('talent');
+    expect(mapKwadrant('Talent\\voorloper')).toBe('talent');
+    expect(mapKwadrant('Vaste waarde\\sterkhouder')).toBe('vaste_waarde');
     expect(mapKwadrant('voorloper')).toBe('talent');
     expect(mapKwadrant('Vaste waarde/sterkhouder')).toBe('vaste_waarde');
     expect(mapKwadrant('Sterkhouders')).toBe('vaste_waarde');

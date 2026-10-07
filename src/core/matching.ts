@@ -1,8 +1,10 @@
+import { bedrijfCodeVoor } from './config/bedrijven';
 import { mapKwadrant, type SppStatus } from './config/kwadranten';
 import { normaliseerNaam } from './parsing/tabel';
 import type { DashboardRegel, HrMedewerker, SppRij, Uitzondering } from './types';
 
 export const ONBEKEND_BEDRIJF = 'Onbekend (niet in HR-lijst)';
+
 export const ONBEKENDE_AFDELING = 'Onbekend (niet in HR-lijst)';
 
 export type KoppelWijze = 'personeelsnummer' | 'email' | 'naam';
@@ -47,7 +49,8 @@ const hrSleutel = (m: HrMedewerker) => `hr:${m.rijnummer}`;
  * export (company and department). Per SPP row the most reliable available key is used:
  * personnel number, then work e-mail, then the normalised name.
  * - The SPP export determines who is on the dashboard; HR employees missing from it are only counted.
- * - An SPP row without HR match stays on the dashboard with an unknown company/department and is reported.
+ * - An SPP row without HR match stays on the dashboard (company from the SPP export when present,
+ *   department unknown) and is reported.
  * - A name that occurs more than once in the HR export is not matched on name (reported).
  * - The same employee twice in the SPP export: the last row with a quadrant counts (reported).
  * - An unrecognised quadrant value counts as "niet gescoord" and is reported.
@@ -111,14 +114,14 @@ export function koppel(spp: readonly SppRij[], hr: readonly HrMedewerker[], best
         detail:
           gevonden === 'dubbelzinnig'
             ? 'Deze naam komt meerdere keren voor in de HR-export; niet gekoppeld. Voeg personeelsnummer of e-mail toe aan de SPP-export.'
-            : 'Niet gevonden in de HR-export; getoond met onbekend bedrijf en onbekende afdeling.',
+            : `Niet gevonden in de HR-export${r.personeelsnummer ? ` (personeelsnummer ${r.personeelsnummer})` : ''}; getoond met onbekende afdeling.`,
       });
       regel = {
         sleutel: `spp:${r.email ?? r.personeelsnummer ?? normaliseerNaam(r.naam)}`,
         naam: r.naam,
         leidinggevende: r.leidinggevende,
-        bedrijfCode: null,
-        werkgevernaam: ONBEKEND_BEDRIJF,
+        bedrijfCode: r.bedrijf ? (bedrijfCodeVoor(r.bedrijf) ?? null) : null,
+        werkgevernaam: r.bedrijf || ONBEKEND_BEDRIJF,
         afdeling: ONBEKENDE_AFDELING,
         status,
         inHr: false,

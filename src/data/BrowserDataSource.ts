@@ -10,6 +10,9 @@ import { GeenToegangFout, MAX_UPLOAD_BYTES, UploadFout, type BeheerOverzicht, ty
 
 type Bytes = ArrayBuffer | Uint8Array;
 
+/** Demo: at least this share of the SPP rows must match the fictitious HR list. */
+const MIN_DEMO_KOPPELING = 0.9;
+
 interface Staat {
   spp: SppResultaat;
   resultaat: KoppelResultaat;
@@ -22,8 +25,9 @@ export interface BrowserDataOpties {
   /** Loader for bundled data (demo). Without it the source starts empty until an upload. */
   gebundeld?: () => Promise<{ spp: Bytes; hr: Bytes }>;
   /**
-   * Demo guard: refuse files containing an e-mail address that does not end in `.example`, and
-   * SPP files without an e-mail column (the fictitious data is recognisable by its addresses).
+   * Demo guard: refuse files containing an e-mail address that does not end in `.example`, and an
+   * SPP export that does not fit the (verified fictitious) HR export: real SPP exports contain no
+   * e-mail addresses, but their personnel numbers and names do not occur in the fictitious HR list.
    * Default true; only the local offline build (which has no network access) turns it off.
    */
   alleenFictief?: boolean;
@@ -31,7 +35,7 @@ export interface BrowserDataOpties {
 
 async function verwerk(sppBytes: Bytes, hrBytes: Bytes) {
   const [sppTabel, hrTabel] = await Promise.all([
-    leesWerkblad(sppBytes, null, SPP_KOLOMMEN.kwadrant.namen),
+    leesWerkblad(sppBytes, null, SPP_KOLOMMEN.kwadrant.namen, { eersteAlsTerugval: true }),
     leesWerkblad(hrBytes, HR_WERKBLAD, HR_HERKENNINGSKOP),
   ]);
   const spp = parseSpp(sppTabel);
@@ -113,10 +117,11 @@ export class BrowserDataSource implements DataSource {
     } catch (e) {
       throw new UploadFout(e instanceof ParseFout ? e.message : 'De bestanden konden niet worden verwerkt.');
     }
-    if (this.alleenFictief && !data.spp.heeftEmail) {
+    const { medewerkers, gekoppeld } = data.resultaat.samenvatting;
+    if (this.alleenFictief && gekoppeld < medewerkers * MIN_DEMO_KOPPELING) {
       throw new UploadFout(
-        `"${spp.name}" is geweigerd: de demo herkent fictieve gegevens aan e-mailadressen op ".example", en dit bestand heeft geen e-mailkolom. ` +
-          'Gebruik voor echte exports de lokale versie.',
+        `"${spp.name}" is geweigerd: het sluit niet aan op de fictieve HR-lijst (${gekoppeld} van ${medewerkers} medewerkers gekoppeld). ` +
+          'Deze demo accepteert uitsluitend fictieve gegevens. Gebruik voor echte exports de lokale versie.',
       );
     }
     const nieuw: Staat = { ...data, bestanden: { spp: spp.name, hr: hr.name }, bron: 'upload', peildatum: new Date() };
@@ -129,7 +134,7 @@ function overzicht(s: Staat): BeheerOverzicht {
   return {
     samenvatting: s.resultaat.samenvatting,
     uitzonderingen: s.resultaat.uitzonderingen,
-    sppKolommen: { email: s.spp.heeftEmail, personeelsnummer: s.spp.heeftPersoneelsnummer, leidinggevende: s.spp.heeftLeidinggevende },
+    sppKolommen: { kopregel: s.spp.heeftKopregel, email: s.spp.heeftEmail, personeelsnummer: s.spp.heeftPersoneelsnummer, leidinggevende: s.spp.heeftLeidinggevende },
     bestanden: s.bestanden,
     bron: s.bron,
     peildatum: s.peildatum,
