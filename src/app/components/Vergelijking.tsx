@@ -4,9 +4,11 @@ import { KWADRANTEN, STATUS_LABELS, type SppStatus } from '../../core/config/kwa
 import { STANDAARD_MIN_GROEPSGROOTTE } from '../../core/config/instellingen';
 import { deel, fmt, noemer, statussenVoor, type Basis } from './Kwadrant';
 
-export type Dimensie = 'bedrijf' | 'afdeling' | 'leidinggevende';
+/** IJK only: groups are compared per department or per manager (not per company). */
+export type Dimensie = 'afdeling' | 'leidinggevende';
 
-const DIMENSIE_LABELS: Record<Dimensie, string> = { bedrijf: 'Bedrijven', afdeling: 'Afdelingen/OE', leidinggevende: 'Leidinggevenden' };
+const DIMENSIE_LABELS: Record<Dimensie, string> = { afdeling: 'Afdelingen/OE', leidinggevende: 'Leidinggevenden' };
+const DIMENSIE_TITELS: Record<Dimensie, string> = { afdeling: 'afdelingen/OE', leidinggevende: 'leidinggevenden' };
 const MAX_RIJEN = 20;
 
 /**
@@ -21,7 +23,7 @@ export function Vergelijking(props: {
   onKies: (dimensie: Dimensie, g: Groep) => void;
 }) {
   const { groepen, totaal, basis } = props;
-  const [dimensie, setDimensie] = useState<Dimensie>('bedrijf');
+  const [dimensie, setDimensie] = useState<Dimensie>('afdeling');
   const [gekozen, setKwadrant] = useState<SppStatus | null>(null);
   const [klein, setKlein] = useState(false);
   const [alles, setAlles] = useState(false);
@@ -43,7 +45,7 @@ export function Vergelijking(props: {
   return (
     <section className="kaart">
       <div className="kaart-kop">
-        <h2>Vergelijking tussen {DIMENSIE_LABELS[dimensie].toLowerCase()}</h2>
+        <h2>Vergelijking tussen {DIMENSIE_TITELS[dimensie]}</h2>
         <div className="segment-keuze" role="group" aria-label="Vergelijk">
           {(Object.keys(DIMENSIE_LABELS) as Dimensie[]).map((d) => (
             <button key={d} type="button" aria-pressed={d === dimensie} onClick={() => setDimensie(d)}>

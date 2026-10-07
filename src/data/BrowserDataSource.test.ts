@@ -28,10 +28,10 @@ describe('BrowserDataSource (demo)', () => {
   it('loads the bundled data with every edge case', async () => {
     const ds = demo();
     const d = await ds.getDashboard(['gebruiker']);
-    expect(d.regels.length).toBe(835); // 836 rows minus one duplicate
+    expect(d.regels.length).toBe(266); // 267 rows minus one duplicate
     const b = (await ds.getBeheer(['beheerder']))!;
     expect(new Set(b.uitzonderingen.map((u) => u.type))).toEqual(new Set(['geen_hr_match', 'spp_dubbel', 'onbekend_kwadrant']));
-    expect(b.samenvatting.perWijze).toEqual({ personeelsnummer: 0, email: 0, naam: 834 }); // HR export has no personnel number; incl. the duplicate row
+    expect(b.samenvatting.perWijze).toEqual({ personeelsnummer: 0, email: 0, naam: 265 }); // HR export has no personnel number; incl. the duplicate row
     expect(b.sppKolommen.kopregel).toBe(false);
     // Two external rows are not in the HR list; a row without e-mail may hit a name that occurs twice
     expect(b.samenvatting.gekoppeld).toBe(b.samenvatting.medewerkers - b.uitzonderingen.filter((u) => u.type === 'geen_hr_match' || u.type === 'naam_dubbelzinnig').length);

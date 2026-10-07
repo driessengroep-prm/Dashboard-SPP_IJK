@@ -1,6 +1,6 @@
 # Dashboard SPP IJK
 
-Interne webtool van IJK (Driessen Groep) voor de **strategische personeelsplanning (SPP)**. HR-collega's van IJK zien welke medewerkers door hun leidinggevende in een van de vier SPP-kwadranten zijn geplot, bij welk bedrijf en welke afdeling/OE zij werken, en wie hun leidinggevende is.
+Interne webtool van IJK (Driessen Groep) voor de **strategische personeelsplanning (SPP)**, alleen voor IJK. HR-collega's van IJK zien welke medewerkers door hun leidinggevende in een van de vier SPP-kwadranten zijn geplot, bij welk bedrijf en welke afdeling/OE zij werken, en wie hun leidinggevende is.
 
 > **Demo:** https://driessengroep-prm.github.io/Dashboard-SPP_IJK/
 >
@@ -30,10 +30,9 @@ Alles volgt de filters (bedrijf, afdeling/OE, leidinggevende, medewerker, SPP-kw
 
 - **Kerncijfers:** aantal medewerkers, en per kwadrant het aantal en het percentage. Klik op een tegel om op dat kwadrant te filteren.
 - **SPP-matrix** (2×2) volgens de potentieel- en prestatiematrix: horizontaal *prestatie* (laag → hoog), verticaal *groeiruimte* (laag boven → hoog onder). Achterblijver (eerlijke aandacht) en Vaste waarde (koesteren) boven, Vraagteken (uitdagen) en Talent (faciliteren) onder. Vastgelegd in `src/core/config/kwadranten.ts`.
-- **Per bedrijf:** verhouding van de kwadranten per bedrijf (100%-balken).
-- **Vergelijking tussen bedrijven, afdelingen of leidinggevenden:** per gekozen kwadrant het aandeel per groep, van hoog naar laag, met het gemiddelde van de selectie als stippellijn. Groepen kleiner dan 5 zijn standaard verborgen.
+- **Vergelijking tussen afdelingen of leidinggevenden:** per gekozen kwadrant het aandeel per groep, van hoog naar laag, met het gemiddelde van de selectie als stippellijn. Groepen kleiner dan 5 zijn standaard verborgen.
 - **Per afdeling/OE** en **per leidinggevende:** verdeling, aantallen of percentages per kwadrant, sorteerbaar.
-- **Medewerkers:** naam, bedrijf, afdeling/OE, leidinggevende en kwadrant; zoeken, sorteren en **exporteren naar Excel** (precies de getoonde lijst, plus de tabellen per bedrijf/afdeling/leidinggevende en de gebruikte selectie).
+- **Medewerkers:** naam, bedrijf, afdeling/OE, leidinggevende en kwadrant; zoeken, sorteren en **exporteren naar Excel** (precies de getoonde lijst, plus de tabellen per afdeling/leidinggevende en de gebruikte selectie).
 - **Percentages van:** kies of percentages over de gescoorde medewerkers (standaard) of over alle medewerkers gaan.
 
 ## Lokaal gebruiken met echte exports
@@ -64,7 +63,7 @@ Vereist: Node.js 20 of hoger (CI gebruikt 22).
 | `npm run privacy-check` | Privacycheck op de repo en `dist/` |
 | `npm run testdata` | Fictieve testdata opnieuw genereren in `testdata/fictief/` |
 
-De fictieve testdata volgt de echte structuur van bedrijven en OE's (833 medewerkers bij 14 bedrijven) met verzonnen namen, leidinggevenden en kwadranten; alle e-mailadressen eindigen op `.example`. De fictieve SPP-export heeft hetzelfde formaat als de echte (geen kopregel, kolommen A–E). Net als de echte HR-export heeft de fictieve HR-lijst geen personeelsnummer. Bewuste randgevallen: verschillende schrijfwijzen van kwadranten, gelijke namen (onderscheiden op bedrijf), een onbekende kwadrantwaarde, een dubbele SPP-regel en twee personen die niet in de HR-lijst staan.
+De fictieve testdata volgt de echte structuur van bedrijven en OE's met verzonnen namen, leidinggevenden en kwadranten; alle e-mailadressen eindigen op `.example`. De fictieve HR-lijst bevat de hele groep (833 medewerkers bij 14 bedrijven), de fictieve SPP-export alleen de medewerkers van IJK B.V. en IJK Services B.V., in hetzelfde formaat als de echte (geen kopregel, kolommen A–E). Net als de echte HR-export heeft de fictieve HR-lijst geen personeelsnummer. Bewuste randgevallen: verschillende schrijfwijzen van kwadranten, gelijke namen (onderscheiden op bedrijf), een onbekende kwadrantwaarde, een dubbele SPP-regel en twee personen die niet in de HR-lijst staan.
 
 ## Publicatie (GitHub Pages)
 

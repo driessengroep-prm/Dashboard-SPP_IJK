@@ -160,18 +160,20 @@ async function schrijfSpp(rijen: SppRegel[]) {
 async function main() {
   mkdirSync(OUT_DIR, { recursive: true });
   const medewerkers = maakMedewerkers();
-  const spp: SppRegel[] = medewerkers.map((m) => {
+  // The SPP export only covers IJK (the HR export covers the whole group)
+  const ijk = medewerkers.filter((m) => m.bedrijf.code === 'ijk' || m.bedrijf.code === 'ijkservices');
+  const spp: SppRegel[] = ijk.map((m) => {
     const p = profiel(`${m.bedrijf.code}|${m.afdeling}`);
     const kwadrant = rnd() < p.gescoord ? pick(SCHRIJFWIJZEN[kiesKwadrant(p.gewichten)]) : '';
     return [m.personeelsnummer, m.naam, m.bedrijf.werkgevernaam, m.leidinggevende, kwadrant];
   });
 
   // Edge cases
-  spp.push([90001, 'Stagiair Extern', 'IJK B.V.', medewerkers[0].leidinggevende, 'Vraagteken']); // not in the HR list
-  spp.push([90002, 'Oud Medewerker', 'Driessen B.V.', medewerkers[1].leidinggevende, '']); // not in the HR list, not scored
-  const dubbel = medewerkers[5];
+  spp.push([90001, 'Stagiair Extern', 'IJK B.V.', ijk[0].leidinggevende, 'Vraagteken']); // not in the HR list
+  spp.push([90002, 'Oud Medewerker', 'IJK Services B.V.', ijk[1].leidinggevende, '']); // not in the HR list, not scored
+  const dubbel = ijk[5];
   spp.push([dubbel.personeelsnummer, dubbel.naam, dubbel.bedrijf.werkgevernaam, dubbel.leidinggevende, 'Talent\\voorloper']); // duplicate row
-  spp[142][4] = 'Ster'; // unknown quadrant value
+  spp[42][4] = 'Ster'; // unknown quadrant value
 
   await schrijfHr(medewerkers);
   await schrijfSpp(spp);
