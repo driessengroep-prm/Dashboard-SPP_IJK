@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { perAfdeling, perLeidinggevende, pct, verdeling, type Groep } from '../../core/aggregate';
-import { KWADRANTEN, SPP_STATUSSEN, STATUS_LABELS, type SppStatus } from '../../core/config/kwadranten';
+import { KWADRANTEN, MATRIX_VOLGORDE, SPP_STATUSSEN, STATUS_LABELS, type SppStatus } from '../../core/config/kwadranten';
 import { bouwGroepExport, bouwMedewerkerExport, exportBestandsnaam } from '../../core/export';
 import { bedrijfSleutel, leidinggevendeVan, medewerkerId, pasFiltersToe, pasSelectieToe, type DashboardFilters } from '../../core/filters';
 import type { DashboardRegel } from '../../core/types';
@@ -181,7 +181,7 @@ export function Dashboard() {
               {totaal.gescoord} gescoord ({fmt(pct(totaal.gescoord, totaal.medewerkers))}%)
             </div>
           </div>
-          {SPP_STATUSSEN.map((s) => (
+          {MATRIX_VOLGORDE.map((s) => (
             <button
               key={s}
               type="button"

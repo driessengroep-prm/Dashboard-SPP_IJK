@@ -41,6 +41,13 @@ export const MATRIX_POSITIE: Record<Kwadrant, { rij: 1 | 2; kolom: 1 | 2 }> = {
   talent: { rij: 2, kolom: 2 },
 };
 
+/**
+ * Reading order of the matrix (top-left → bottom-right), followed by "niet gescoord".
+ * Used for the key-figure tiles and the quadrant choice in the comparison, so they match the matrix.
+ * (Stacked bars keep SPP_STATUSSEN: there Talent must not sit next to the grey "niet gescoord".)
+ */
+export const MATRIX_VOLGORDE: readonly SppStatus[] = ['achterblijver', 'vaste_waarde', 'vraagteken', 'talent', 'niet_gescoord'];
+
 /** What each quadrant asks of the manager (from the matrix). */
 export const KWADRANT_ACTIE: Record<Kwadrant, string> = {
   achterblijver: 'eerlijke aandacht',
