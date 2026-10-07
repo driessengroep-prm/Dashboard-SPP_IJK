@@ -47,11 +47,13 @@ const hrSleutel = (m: HrMedewerker) => `hr:${m.rijnummer}`;
 /**
  * Joins the SPP export (who is scored in which quadrant, by which manager) with the HR
  * export (company and department). Per SPP row the most reliable available key is used:
- * personnel number, then work e-mail, then the normalised name.
+ * personnel number, then work e-mail, then the normalised name (first + last name). The HR
+ * export has no personnel number, so in practice the name is the key; when a name occurs more
+ * than once, the company from the SPP export decides.
  * - The SPP export determines who is on the dashboard; HR employees missing from it are only counted.
  * - An SPP row without HR match stays on the dashboard (company from the SPP export when present,
  *   department unknown) and is reported.
- * - A name that occurs more than once in the HR export is not matched on name (reported).
+ * - A name that occurs more than once in the HR export (also within the same company) is not matched (reported).
  * - The same employee twice in the SPP export: the last row with a quadrant counts (reported).
  * - An unrecognised quadrant value counts as "niet gescoord" and is reported.
  */
@@ -69,7 +71,11 @@ export function koppel(spp: readonly SppRij[], hr: readonly HrMedewerker[], best
     if (em?.length === 1) return { m: em[0], wijze: 'email' };
     const nm = r.naam ? opNaam.get(normaliseerNaam(r.naam)) : undefined;
     if (nm?.length === 1) return { m: nm[0], wijze: 'naam' };
-    return nm && nm.length > 1 ? 'dubbelzinnig' : null;
+    if (!nm) return null;
+    // Same name more than once: the company from the SPP export decides
+    const bedrijf = r.bedrijf ? normaliseerNaam(r.bedrijf) : '';
+    const inBedrijf = bedrijf ? nm.filter((m) => normaliseerNaam(m.werkgevernaam) === bedrijf) : [];
+    return inBedrijf.length === 1 ? { m: inBedrijf[0], wijze: 'naam' } : 'dubbelzinnig';
   };
 
   // One entry per employee; a later row replaces an earlier one unless it has no quadrant.
@@ -113,7 +119,7 @@ export function koppel(spp: readonly SppRij[], hr: readonly HrMedewerker[], best
         naam: r.naam,
         detail:
           gevonden === 'dubbelzinnig'
-            ? 'Deze naam komt meerdere keren voor in de HR-export; niet gekoppeld. Voeg personeelsnummer of e-mail toe aan de SPP-export.'
+            ? `Deze naam komt meerdere keren voor in de HR-export${r.bedrijf ? `, ook bij ${r.bedrijf}` : ''}; niet gekoppeld.`
             : `Niet gevonden in de HR-export${r.personeelsnummer ? ` (personeelsnummer ${r.personeelsnummer})` : ''}; getoond met onbekende afdeling.`,
       });
       regel = {

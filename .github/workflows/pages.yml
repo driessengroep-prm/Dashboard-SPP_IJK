@@ -2,8 +2,11 @@ name: Demo naar GitHub Pages
 
 # Every push to main deploys the demo (fictitious data only).
 # Deploy only happens when tests, privacy checks and the build all succeed.
+# Pull requests run the same checks without deploying.
 on:
   push:
+    branches: [main]
+  pull_request:
     branches: [main]
   workflow_dispatch:
 
@@ -13,7 +16,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.event_name == 'pull_request' && github.ref || 'deploy' }}
   cancel-in-progress: false
 
 jobs:
@@ -51,6 +54,7 @@ jobs:
           path: dist
 
   deploy:
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     environment:

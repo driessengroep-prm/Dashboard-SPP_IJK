@@ -88,12 +88,6 @@ export function Beheer() {
               kwadrant.
             </p>
           )}
-          {!overzicht.sppKolommen.email && !overzicht.sppKolommen.personeelsnummer && (
-            <p className="waarschuwing">
-              De SPP-export heeft geen kolom met e-mailadres of personeelsnummer; er is gekoppeld op naam. Dat werkt, maar namen die vaker voorkomen
-              kunnen niet worden gekoppeld. Een export mét e-mail of personeelsnummer is betrouwbaarder.
-            </p>
-          )}
           {!overzicht.sppKolommen.leidinggevende && (
             <p className="waarschuwing">De SPP-export heeft geen kolom voor de leidinggevende ({kolomNamen('leidinggevende')}).</p>
           )}
@@ -172,7 +166,7 @@ function Upload({ onKlaar }: { onKlaar: (o: BeheerOverzicht) => void }) {
         <ul className="kolomlijst">
           <li>
             SPP-export zonder kopregel (zoals de standaardexport): A personeelsnummer, B naam, C bedrijf, D leidinggevende, E kwadrant. De koppeling met
-            de HR-export gaat dan op personeelsnummer.
+            de HR-export gaat op naam (voor- en achternaam); komt een naam vaker voor, dan beslist het bedrijf uit kolom C.
           </li>
           <li>SPP-export mét kopregel, naam medewerker (verplicht): {kolomNamen('naam')}</li>
           <li>SPP-export mét kopregel, kwadrant (verplicht): {kolomNamen('kwadrant')}. Leeg = niet gescoord.</li>

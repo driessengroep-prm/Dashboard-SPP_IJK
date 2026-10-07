@@ -44,6 +44,12 @@ describe('koppel', () => {
     expect(r.samenvatting).toMatchObject({ medewerkers: 1, nietGekoppeld: 1, hrNietInSpp: 1 });
   });
 
+  it('uses the company to tell apart employees with the same name', () => {
+    const h = [hr('Kim Jansma', { afdeling: 'IJK - A' }), hr('Kim Jansma', { bedrijfCode: 'driessen', werkgevernaam: 'Driessen B.V.', afdeling: 'DR - B' })];
+    const r = koppel([spp('Kim Jansma', 'Talent', { bedrijf: 'Driessen B.V.' })], h);
+    expect(r.regels[0]).toMatchObject({ inHr: true, afdeling: 'DR - B' });
+  });
+
   it('does not match an ambiguous name', () => {
     const r = koppel([spp('Kim Jansma', 'Talent')], [hr('Kim Jansma'), hr('Kim Jansma')]);
     expect(r.regels[0].inHr).toBe(false);
