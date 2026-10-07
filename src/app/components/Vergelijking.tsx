@@ -25,14 +25,14 @@ export function Vergelijking(props: {
   const { groepen, totaal, basis } = props;
   const [dimensie, setDimensie] = useState<Dimensie>('afdeling');
   const [gekozen, setKwadrant] = useState<SppStatus | null>(null);
-  const [klein, setKlein] = useState(false);
   const [alles, setAlles] = useState(false);
   const opties = statussenVoor(basis);
   const kwadrant = gekozen && opties.includes(gekozen) ? gekozen : opties.includes(props.startKwadrant) ? props.startKwadrant : KWADRANTEN[0];
 
   const groot = (g: Groep) => noemer(g, basis) >= STANDAARD_MIN_GROEPSGROOTTE;
   const kandidaten = groepen[dimensie].filter((g) => noemer(g, basis) > 0);
-  const getoond = (klein ? kandidaten : kandidaten.filter(groot)).sort(
+  // Groups smaller than the minimum are left out: their percentages say little
+  const getoond = kandidaten.filter(groot).sort(
     (a, b) => deel(b, kwadrant, basis) - deel(a, kwadrant, basis) || noemer(b, basis) - noemer(a, basis) || a.label.localeCompare(b.label, 'nl'),
   );
   const verborgen = kandidaten.length - getoond.length;
@@ -63,15 +63,11 @@ export function Vergelijking(props: {
             </button>
           ))}
         </div>
-        <label className="filter inline">
-          <input type="checkbox" checked={klein} onChange={(e) => setKlein(e.target.checked)} />
-          <span>Ook groepen kleiner dan {STANDAARD_MIN_GROEPSGROOTTE}</span>
-        </label>
       </div>
       <p className="subtiel klein">
         Aandeel {STATUS_LABELS[kwadrant]} per groep, als percentage van de {basisTekst} in die groep; van hoog naar laag. De stippellijn is het
         gemiddelde van de hele selectie ({fmt(gemiddeld)}%). Klik op een naam om erop te filteren.
-        {verborgen > 0 && ` ${verborgen} kleine groep${verborgen === 1 ? '' : 'en'} verborgen.`}
+        {verborgen > 0 && ` Groepen kleiner dan ${STANDAARD_MIN_GROEPSGROOTTE} worden niet getoond.`}
       </p>
       {zichtbaar.length === 0 ? (
         <p className="melding">Geen groepen om te vergelijken in deze selectie.</p>
