@@ -29,7 +29,7 @@ De beheerder uploadt op de beheerpagina twee Excel-exports, als **.xlsx** of **.
 Alles volgt de filters (bedrijf, afdeling/OE, leidinggevende, medewerker, SPP-kwadrant). De filters staan in de URL, zodat je een selectie kunt delen; medewerkers staan daarin als onleesbare code.
 
 - **Kerncijfers:** aantal medewerkers, en per kwadrant het aantal en het percentage. Klik op een tegel om op dat kwadrant te filteren.
-- **SPP-matrix** (2×2) volgens de potentieel- en prestatiematrix: horizontaal *prestatie* (laag → hoog), verticaal *groeiruimte* (laag boven → hoog onder). Achterblijver (eerlijke aandacht) en Vaste waarde (koesteren) boven, Vraagteken (uitdagen) en Talent (faciliteren) onder. Vastgelegd in `src/core/config/kwadranten.ts`.
+- **SPP-matrix** (2×2) volgens de prestatie- en potentieelscan van de Driessen Groep: horizontaal *prestatie* (laag links → hoog rechts), verticaal *groeiruimte* (laag onder → hoog boven). Boven Vraagteken (uitdagen) en Talent/voorloper (faciliteren), onder Achterblijver (eerlijke aandacht) en Vaste waarde/sterkhouder (koesteren). Tegels, legenda's, balken en tabellen volgen dezelfde volgorde. Vastgelegd in `src/core/config/kwadranten.ts`.
 - **Vergelijking tussen afdelingen of leidinggevenden:** per gekozen kwadrant het aandeel per groep, van hoog naar laag, met het gemiddelde van de selectie als stippellijn. Groepen kleiner dan 5 worden niet getoond.
 - **Per afdeling/OE** en **per leidinggevende:** verdeling, aantallen of percentages per kwadrant, sorteerbaar.
 - **Medewerkers:** naam, bedrijf, afdeling/OE, leidinggevende en kwadrant; zoeken, sorteren en **exporteren naar Excel** (precies de getoonde lijst, plus de tabellen per afdeling/leidinggevende en de gebruikte selectie).
