@@ -14,24 +14,21 @@ export function KwadrantMatrix(props: { v: Verdeling; basis: Basis; actief: SppS
   return (
     <>
       <div className="matrix-raster">
-        <div className="matrix-as-titel x">
-          {MATRIX_ASSEN.x.titel}
-        </div>
-        <div className="matrix-as-niveau" style={{ gridRow: 2, gridColumn: 3 }}>
-          Laag
-        </div>
-        <div className="matrix-as-niveau" style={{ gridRow: 2, gridColumn: 4 }}>
+        {/* Groeiruimte on the left (high at the top), prestatie below (high on the right) */}
+        <div className="matrix-as-titel y">{MATRIX_ASSEN.y.titel} →</div>
+        <div className="matrix-as-niveau rij" style={{ gridRow: 1, gridColumn: 2 }}>
           Hoog
         </div>
-        <div className="matrix-as-titel y">
-          {MATRIX_ASSEN.y.titel}
-        </div>
-        <div className="matrix-as-niveau rij" style={{ gridRow: 3, gridColumn: 2 }}>
+        <div className="matrix-as-niveau rij" style={{ gridRow: 2, gridColumn: 2 }}>
           Laag
         </div>
-        <div className="matrix-as-niveau rij" style={{ gridRow: 4, gridColumn: 2 }}>
+        <div className="matrix-as-niveau" style={{ gridRow: 3, gridColumn: 3 }}>
+          Laag
+        </div>
+        <div className="matrix-as-niveau" style={{ gridRow: 3, gridColumn: 4 }}>
           Hoog
         </div>
+        <div className="matrix-as-titel x">{MATRIX_ASSEN.x.titel} →</div>
         {KWADRANTEN.map((k) => {
           const pos = MATRIX_POSITIE[k];
           const klassen = ['matrix-cel', actief.includes(k) ? 'actief' : '', actief.length && !actief.includes(k) ? 'gedimd' : ''].join(' ');
@@ -41,7 +38,7 @@ export function KwadrantMatrix(props: { v: Verdeling; basis: Basis; actief: SppS
               type="button"
               className={klassen}
               aria-pressed={actief.includes(k)}
-              style={{ gridRow: pos.rij + 2, gridColumn: pos.kolom + 2, ['--cel-kleur' as string]: `var(--k-${k})` }}
+              style={{ gridRow: pos.rij, gridColumn: pos.kolom + 2, ['--cel-kleur' as string]: `var(--k-${k})` }}
               onClick={() => onKies(k)}
               title={`${STATUS_LABELS[k]}: ${v.telling[k]} van ${v.gescoord} gescoorde medewerkers. Klik om op dit kwadrant te filteren.`}
             >

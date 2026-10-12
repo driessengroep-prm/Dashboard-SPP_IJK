@@ -1,9 +1,11 @@
 /**
  * The four SPP quadrants (strategische personeelsplanning) plus "niet gescoord".
- * The order is fixed: it is the order of the stacked bars, legends and tables, and the
- * colours follow the entity (never the rank).
+ * The order is fixed and follows the reading order of the matrix (top-left → bottom-right):
+ * Vraagteken, Talent/voorloper, Achterblijver, Vaste waarde/sterkhouder. It is used for tiles,
+ * legends, stacked bars and tables alike; the colours follow the entity (never the rank). In this
+ * order no two adjacent bar segments are hard to tell apart (validated for colour blindness).
  */
-export const KWADRANTEN = ['talent', 'vaste_waarde', 'vraagteken', 'achterblijver'] as const;
+export const KWADRANTEN = ['vraagteken', 'talent', 'achterblijver', 'vaste_waarde'] as const;
 export type Kwadrant = (typeof KWADRANTEN)[number];
 
 export const SPP_STATUSSEN = [...KWADRANTEN, 'niet_gescoord'] as const;
@@ -27,26 +29,22 @@ export const KORTE_LABELS: Record<SppStatus, string> = {
 };
 
 /**
- * The 2×2 SPP matrix as used at the Driessen Groep ("Potentieel en prestatiematrix"):
- * horizontal = prestatie (low → high), vertical = groeiruimte (low at the top → high at the bottom).
+ * The 2×2 SPP matrix as used at the Driessen Groep ("Prestatie- en potentieelscan"):
+ * horizontal = prestatie (low left → high right), vertical = groeiruimte (low bottom → high top).
  */
 export const MATRIX_ASSEN = {
   x: { titel: 'Prestatie' },
   y: { titel: 'Groeiruimte' },
 };
 export const MATRIX_POSITIE: Record<Kwadrant, { rij: 1 | 2; kolom: 1 | 2 }> = {
-  achterblijver: { rij: 1, kolom: 1 },
-  vaste_waarde: { rij: 1, kolom: 2 },
-  vraagteken: { rij: 2, kolom: 1 },
-  talent: { rij: 2, kolom: 2 },
+  vraagteken: { rij: 1, kolom: 1 },
+  talent: { rij: 1, kolom: 2 },
+  achterblijver: { rij: 2, kolom: 1 },
+  vaste_waarde: { rij: 2, kolom: 2 },
 };
 
-/**
- * Reading order of the matrix (top-left → bottom-right), followed by "niet gescoord".
- * Used for the key-figure tiles and the quadrant choice in the comparison, so they match the matrix.
- * (Stacked bars keep SPP_STATUSSEN: there Talent must not sit next to the grey "niet gescoord".)
- */
-export const MATRIX_VOLGORDE: readonly SppStatus[] = ['achterblijver', 'vaste_waarde', 'vraagteken', 'talent', 'niet_gescoord'];
+/** Reading order of the matrix, followed by "niet gescoord" (the same as SPP_STATUSSEN). */
+export const MATRIX_VOLGORDE: readonly SppStatus[] = SPP_STATUSSEN;
 
 /** What each quadrant asks of the manager (from the matrix). */
 export const KWADRANT_ACTIE: Record<Kwadrant, string> = {

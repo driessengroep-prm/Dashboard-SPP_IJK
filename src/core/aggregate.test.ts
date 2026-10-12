@@ -49,6 +49,7 @@ describe('export', () => {
   it('exports employees with labels and groups with fractions', () => {
     expect(bouwMedewerkerExport([regels[0]]).rijen).toEqual([['Persoon a', 'IJK B.V.', 'IJK - Afd', 'Baas', 'Talent/voorloper']]);
     const g = bouwGroepExport('Per bedrijf', 'Bedrijf', perBedrijf(regels)).rijen.find((r) => r[0] === 'IJK B.V.')!;
-    expect(g.slice(0, 8)).toEqual(['IJK B.V.', 3, 3, 0, 1, 1 / 3, 2, 2 / 3]);
+    // Columns per quadrant in matrix order: Vraagteken, Talent, Achterblijver, Vaste waarde
+    expect(g).toEqual(['IJK B.V.', 3, 3, 0, 0, 0, 1, 1 / 3, 0, 0, 2, 2 / 3]);
   });
 });
